@@ -342,7 +342,7 @@ export default function Home() {
           {currentServicesHeader.description}
         </p>
 
-        <div className="flex gap-6 overflow-x-auto pb-4 scrollbar-hide">
+        <div className="flex gap-6 overflow-x-auto pb-4 scrollbar-hide" ref={scrollRef}>
           {currentServices.map((item, idx) => (
             <div
               key={idx}
