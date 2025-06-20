@@ -266,10 +266,10 @@ export default function Home() {
             {currentHero.subtitle}
           </p>
           <Link 
-            href={currentHero.ctaLink} 
+            href="https://www.shayjoinery.co/" 
             className="inline-block bg-[#d4ac29] hover:bg-[#c39c25] text-black py-3 px-8 rounded-full font-semibold"
           >
-            {currentHero.ctaText}
+            Get Started
           </Link>
         </div>
       </section>
