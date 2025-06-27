@@ -513,7 +513,7 @@ export async function getProcessSection(): Promise<ProcessSection | null> {
 
     const entry = entries.items[0] as any;
     return {
-      subtitle: entry.fields.subtitle || 'How We Works',
+      subtitle: entry.fields.subtitle || 'How We Work',
       title: entry.fields.title || 'Get Started With Our Process',
       description: entry.fields.description || '',
       processSteps: (entry.fields.processStep || []).map((item: any) => ({
