@@ -19,6 +19,14 @@ import {
   GalleryItem,
   TestimonialsSection
 } from '../lib/contentful'
+import { Dialog, DialogTrigger, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogClose, DialogOverlay } from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { Select, SelectTrigger, SelectContent, SelectItem, SelectValue } from "@/components/ui/select";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { Button } from "@/components/ui/button";
+import { useToast } from "@/components/ui/use-toast";
+import emailjs from 'emailjs-com';
 
 export default function Home() {
   const scrollRef = useRef<HTMLDivElement>(null);
@@ -30,6 +38,31 @@ export default function Home() {
   const [galleryItemsData, setGalleryItemsData] = useState<GalleryItem[]>([]);
   const [testimonialsData, setTestimonialsData] = useState<TestimonialsSection | null>(null);
   const [loading, setLoading] = useState(true);
+  const { toast } = useToast();
+  const [dialogOpen, setDialogOpen] = useState(false);
+  const [selectedService, setSelectedService] = useState<string | null>(null);
+  const [form, setForm] = useState({
+    name: '',
+    email: '',
+    phone: '',
+    projectType: '',
+    propertyLocation: '',
+    projectDescription: '',
+    preferredContact: '',
+    timeline: ''
+  });
+  const [submitting, setSubmitting] = useState(false);
+  const projectTypes = [
+    'Furniture',
+    'Kitchen',
+    'Doors/Windows',
+    'Commercial',
+    'Other'
+  ];
+  const contactMethods = [
+    'Email',
+    'Phone'
+  ];
 
   // Fallback data (current hardcoded data)
   const fallbackServices = [
@@ -230,6 +263,55 @@ export default function Home() {
     ]
   };
 
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    setForm({ ...form, [e.target.name]: e.target.value });
+  };
+  const handleSelectChange = (value: string) => {
+    setForm({ ...form, projectType: value });
+  };
+  const handleRadioChange = (value: string) => {
+    setForm({ ...form, preferredContact: value });
+  };
+  const handleOpen = (service: string) => {
+    setSelectedService(service);
+    setForm(f => ({ ...f, projectType: service }));
+    setDialogOpen(true);
+  };
+  const handleClose = () => {
+    setDialogOpen(false);
+    setSelectedService(null);
+    setForm({
+      name: '',
+      email: '',
+      phone: '',
+      projectType: '',
+      propertyLocation: '',
+      projectDescription: '',
+      preferredContact: '',
+      timeline: ''
+    });
+  };
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setSubmitting(true);
+    try {
+      await emailjs.send(
+        'service_heoa1wi',
+        'template_fvykw0l',
+        {
+          ...form
+        },
+        'WW5cLJW0ox5H5lB8i'
+      );
+      toast({ title: 'Enquiry sent!', description: 'We have received your enquiry and will contact you soon.' });
+      handleClose();
+    } catch (err) {
+      toast({ title: 'Failed to send enquiry', description: 'Please try again later.', variant: 'destructive' });
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -319,62 +401,126 @@ export default function Home() {
 
       {/* About Us Section */}
       <section className="bg-[#f5f5f0] py-16 relative">
-      <div className="absolute right-0 top-0 h-full w-[300px] bg-contain bg-no-repeat bg-right" 
-           style={{ 
-             backgroundImage: currentServicesHeader.backgroundImage ? 
-               `url(https:${currentServicesHeader.backgroundImage.fields.file.url})` : 
-               'url("/Ornament.png")' 
-           }} 
-      />
-      <div className="max-w-7xl mx-auto px-6 relative z-10">
-        <p className="text-[#b46931] font-medium mb-2">{currentServicesHeader.subtitle}</p>
-        <h2 className="text-3xl font-bold text-[#1b1b1b] mb-4">
-          {currentServicesHeader.title.split(' ').length > 6 ? (
-            <>
-              {currentServicesHeader.title.split(' ').slice(0, Math.ceil(currentServicesHeader.title.split(' ').length / 2)).join(' ')} <br />
-              {currentServicesHeader.title.split(' ').slice(Math.ceil(currentServicesHeader.title.split(' ').length / 2)).join(' ')}
-            </>
-          ) : (
-            currentServicesHeader.title
-          )}
-        </h2>
-        <p className="text-gray-600 mb-12 max-w-2xl">
-          {currentServicesHeader.description}
-        </p>
+        <div className="absolute right-0 top-0 h-full w-[300px] bg-contain bg-no-repeat bg-right" 
+             style={{ 
+               backgroundImage: currentServicesHeader.backgroundImage ? 
+                 `url(https:${currentServicesHeader.backgroundImage.fields.file.url})` : 
+                 'url("/Ornament.png")' 
+             }} 
+        />
+        <div className="max-w-7xl mx-auto px-6 relative z-10">
+          <p className="text-[#b46931] font-medium mb-2">
+            {currentServicesHeader.subtitle || "Our Services"}
+          </p>
+          <h2 className="text-3xl font-bold text-[#1b1b1b] mb-4">
+            {currentServicesHeader.title ? (
+              currentServicesHeader.title.split(' ').length > 6 ? (
+                <>
+                  {currentServicesHeader.title.split(' ').slice(0, Math.ceil(currentServicesHeader.title.split(' ').length / 2)).join(' ')} <br />
+                  {currentServicesHeader.title.split(' ').slice(Math.ceil(currentServicesHeader.title.split(' ').length / 2)).join(' ')}
+                </>
+              ) : (
+                currentServicesHeader.title
+              )
+            ) : (
+              <>Custom Furniture & Interior <br />Woodwork Built to Last.</>
+            )}
+          </h2>
+          <p className="text-gray-600 mb-12 max-w-2xl">
+            {currentServicesHeader.description || "Our skilled London joiners combine time-honoured techniques with contemporary innovation to deliver"}
+          </p>
 
-        <div className="flex gap-6 overflow-x-auto pb-4 scrollbar-hide" ref={scrollRef}>
-          {currentServices.map((item, idx) => (
-            <div
-              key={idx}
-              className={`min-w-[280px] p-6 rounded-md shadow-sm ${
-                item.backgroundColor
-              } ${item.textColor}`}
+          <div className="flex gap-6 overflow-x-auto pb-4 scrollbar-hide">
+            {(currentServices.length > 0 ? currentServices : fallbackServices).map((item, idx) => (
+              <div
+                key={idx}
+                id={item.title.replace(/\s+/g, '-').replace(/&/g, '&').replace(/[^a-zA-Z0-9-&]/g, '')}
+                className={`relative min-w-[280px] p-6 pt-14 rounded-md shadow-sm ${item.backgroundColor || 'bg-amber-800'} ${item.textColor || 'text-white'} flex flex-col justify-between`}
+                style={{ minHeight: '320px' }}
+              >
+                {/* Icon/Letter fixed in top-left */}
+                <div className="absolute top-4 left-4 text-3xl bg-white bg-opacity-20 w-12 h-12 rounded-full flex items-center justify-center shadow-md">
+                  {item.icon || '🛠️'}
+                </div>
+                <div className="flex-1 flex flex-col justify-between">
+                  <h3 className="text-lg font-semibold mb-2 mt-2">{item.title}</h3>
+                  <p className="text-sm opacity-90 mb-4">{item.description}</p>
+                </div>
+                <span
+                  role="button"
+                  tabIndex={0}
+                  onClick={() => handleOpen(item.title)}
+                  onKeyPress={e => { if (e.key === 'Enter' || e.key === ' ') handleOpen(item.title); }}
+                  className="mt-auto w-fit cursor-pointer text-base font-semibold transition-colors duration-200 relative group focus:outline-none focus:underline"
+                  style={{ display: 'inline-block' }}
+                >
+                  Know More
+                  <span className="inline-block transition-all duration-200 opacity-0 group-hover:opacity-100 group-hover:translate-x-1 ml-1">→</span>
+                  <span className="block h-0.5 bg-current scale-x-0 group-hover:scale-x-100 transition-transform duration-200 origin-left mt-1" style={{width:'100%'}}></span>
+                </span>
+              </div>
+            ))}
+          </div>
+
+          <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
+            {/* Custom DialogOverlay for blur and opacity */}
+            <DialogOverlay className="bg-black/60 backdrop-blur-sm" />
+            <DialogContent
+              className="bg-white/90 backdrop-blur-lg shadow-2xl rounded-2xl p-8 max-w-lg w-full transition-all duration-300 border border-gray-200"
             >
-              <div className="text-3xl mb-4 bg-white w-10 h-10 rounded-full flex items-center justify-center">{item.icon}</div>
-              <h3 className="text-lg font-semibold mb-2">{item.title}</h3>
-              <p className="text-sm opacity-80">{item.description}</p>
-            </div>
-          ))}
+              <DialogHeader>
+                <DialogTitle>Project Enquiry Form</DialogTitle>
+              </DialogHeader>
+              <form onSubmit={handleSubmit} className="space-y-4">
+                <Input name="name" placeholder="Name" value={form.name} onChange={handleInputChange} required />
+                <Input name="email" type="email" placeholder="Email" value={form.email} onChange={handleInputChange} required />
+                <Input name="phone" type="tel" placeholder="Phone" value={form.phone} onChange={handleInputChange} />
+                <Select value={form.projectType} onValueChange={handleSelectChange}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Project Type" />
+                  </SelectTrigger>
+                  <SelectContent className="bg-white">
+                    {projectTypes.map(type => (
+                      <SelectItem key={type} value={type}>{type}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <Input name="propertyLocation" placeholder="Property Location" value={form.propertyLocation} onChange={handleInputChange} />
+                <Textarea name="projectDescription" placeholder="Project Description" value={form.projectDescription} onChange={handleInputChange} />
+                <div>
+                  <label className="block mb-1 font-medium">Preferred Contact Method</label>
+                  <RadioGroup value={form.preferredContact} onValueChange={handleRadioChange} className="flex gap-4">
+                    {contactMethods.map(method => (
+                      <div key={method} className="flex items-center gap-2">
+                        <RadioGroupItem value={method} id={method} />
+                        <label htmlFor={method} className="text-gray-700 cursor-pointer">{method}</label>
+                      </div>
+                    ))}
+                  </RadioGroup>
+                  {form.preferredContact === 'Phone' && (
+                    <Input
+                      name="phone"
+                      type="tel"
+                      placeholder="Enter your phone number"
+                      value={form.phone}
+                      onChange={handleInputChange}
+                      required
+                      className="mt-2"
+                    />
+                  )}
+                </div>
+                <Input name="timeline" placeholder="Timeline" value={form.timeline} onChange={handleInputChange} />
+                <DialogFooter>
+                  <Button type="submit" disabled={submitting} className="text-white">{submitting ? 'Sending...' : 'Send Enquiry'}</Button>
+                  <DialogClose asChild>
+                    <Button type="button" variant="outline" onClick={handleClose}>Cancel</Button>
+                  </DialogClose>
+                </DialogFooter>
+              </form>
+            </DialogContent>
+          </Dialog>
         </div>
-
-        <div className="flex justify-end mt-6 space-x-4">
-          <button 
-            className="w-10 h-10 rounded-full bg-[#e4cc7f] text-white flex items-center justify-center"
-            aria-label="Scroll left"
-            onClick={() => scroll("left")}
-          >
-            <ChevronLeft className="w-5 h-5" />
-          </button>
-          <button 
-            className="w-10 h-10 rounded-full bg-[#b49d2f] text-white flex items-center justify-center"
-            aria-label="Scroll right"
-            onClick={() => scroll("right")}
-          >
-            <ChevronRight className="w-5 h-5" />
-          </button>
-        </div>
-      </div>
-    </section>
+      </section>
 
       {/* Gallery Section - Dynamic from Contentful */}
       <section className="bg-[#f5f5f0] section-padding">

@@ -4,6 +4,13 @@ import { Instagram, Facebook, Linkedin } from "lucide-react"
 import Image from "next/image"
 import { useEffect, useState } from "react"
 import { getFooterContent, FooterContent } from "../lib/contentful"
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "./ui/dialog"
+import type { FooterLink } from "../lib/contentful"
+
+// Extend FooterLink for support links to allow 'data' field
+interface SupportFooterLink extends Omit<FooterLink, 'url'> {
+  data: string;
+}
 
 export default function Footer() {
   const [footerData, setFooterData] = useState<FooterContent | null>(null);
@@ -19,13 +26,13 @@ export default function Footer() {
       { platform: "LinkedIn", url: "#", icon: "linkedin" }
     ],
     serviceLinks: [
-      { label: "Bespoke Furniture & Cabinetry", url: "#" },
-      { label: "Kitchen Carpentry Services", url: "#" },
-      { label: "Doors & Windows", url: "#" },
-      { label: "Architectural Joinery", url: "#" },
-      { label: "Commercial Joinery Services", url: "#" },
-      { label: "Flooring Services", url: "#" },
-      { label: "Additional Services", url: "#" }
+      { label: "Bespoke Furniture & Cabinetry", url: "/our-services" },
+      { label: "Kitchen Carpentry Services", url: "/our-services" },
+      { label: "Doors & Windows", url: "/our-services" },
+      { label: "Architectural Joinery", url: "/our-services" },
+      { label: "Commercial Joinery Services", url: "/our-services" },
+      { label: "Flooring Services", url: "/our-services" },
+      { label: "Additional Services", url: "/our-services" }
     ],
     companyLinks: [
       { label: "About Us", url: "/about-us" },
@@ -33,9 +40,9 @@ export default function Footer() {
       { label: "Contact Us", url: "/contact-us" }
     ],
     supportLinks: [
-      { label: "Privacy Policy", url: "#" },
-      { label: "Terms of Service", url: "#" },
-      { label: "Code of Conduct", url: "#" }
+      { label: "Privacy Policy", url: "Privacy policy content goes here." },
+      { label: "Terms of Service", url: "Terms of service content goes here." },
+      { label: "Code of Conduct", url: "Code of conduct content goes here." }
     ],
     copyrightText: "© 2025 Shay Joinery Ltd. All rights reserved."
   };
@@ -56,7 +63,13 @@ export default function Footer() {
     fetchFooterData();
   }, []);
 
-  const currentFooter = footerData || fallbackFooter;
+  const currentFooter = {
+    ...((footerData || fallbackFooter)),
+    serviceLinks: (footerData?.serviceLinks || fallbackFooter.serviceLinks).map(service => ({
+      ...service,
+      url: "/our-services"
+    }))
+  };
 
   const getSocialIcon = (iconName: string) => {
     switch (iconName.toLowerCase()) {
@@ -121,8 +134,23 @@ export default function Footer() {
           <div>
             <h4 className="font-bold text-lg mb-4">Support</h4>
             <ul className="space-y-2">
-              {currentFooter.supportLinks.map((support, index) => (
-                <FooterLink key={index} href={support.url} label={support.label} />
+              {(currentFooter.supportLinks as unknown as SupportFooterLink[]).map((support, index) => (
+                <li key={index}>
+                  <Dialog>
+                    <DialogTrigger asChild>
+                      <button className="text-sm hover:underline text-left w-full">
+                        {support.label}
+                      </button>
+                    </DialogTrigger>
+                    <DialogContent className="max-w-2xl w-full rounded-2xl p-10 shadow-2xl bg-white text-gray-900">
+                      <DialogHeader>
+                        <DialogTitle className="text-2xl font-bold mb-2 text-green-800">{support.label}</DialogTitle>
+                      </DialogHeader>
+                      <hr className="my-4 border-green-200" />
+                      <div className="mt-2 whitespace-pre-line text-base leading-relaxed text-gray-700">{support.data}</div>
+                    </DialogContent>
+                  </Dialog>
+                </li>
               ))}
             </ul>
           </div>
