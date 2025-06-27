@@ -1,6 +1,6 @@
 "use client"
 import React, { useState, useEffect } from 'react';
-import { Calendar, Clock, User, DollarSign } from 'lucide-react';
+import { Calendar, Clock, User } from 'lucide-react';
 import Image from "next/image";
 import { getPortfolioHero, getOngoingProjectsSection, getCompletedProjectsSection, PortfolioHero, OngoingProjectsSection, CompletedProjectsSection, Project } from '../../lib/contentful';
 
@@ -22,7 +22,6 @@ const CarpentryProjectsPage = () => {
       {
         title: "Belgravia Townhouse Restoration",
         client: "Laing O'Rourke",
-        value: "£15000",
         startedOn: "Apr 10, 2024",
         completedOn: "Ongoing",
         status: "ongoing" as const,
@@ -32,7 +31,6 @@ const CarpentryProjectsPage = () => {
       {
         title: "Modern Kitchen Design, Notting Hill",
         client: "Laing O'Rourke",
-        value: "£15000",
         startedOn: "Apr 10, 2024",
         completedOn: "Ongoing",
         status: "ongoing" as const,
@@ -48,7 +46,6 @@ const CarpentryProjectsPage = () => {
       {
         title: "City of London Office Fit-out",
         client: "Laing O'Rourke",
-        value: "£15000",
         startedOn: "Apr 10, 2024",
         completedOn: "Apr 10, 2025",
         status: "completed" as const,
@@ -58,7 +55,6 @@ const CarpentryProjectsPage = () => {
       {
         title: "Shoreditch Restaurant Interior",
         client: "Laing O'Rourke",
-        value: "£15000",
         startedOn: "Apr 10, 2024",
         completedOn: "Apr 10, 2025",
         status: "completed" as const,
@@ -68,7 +64,6 @@ const CarpentryProjectsPage = () => {
       {
         title: "Hampstead Family Home",
         client: "Laing O'Rourke",
-        value: "£15000",
         startedOn: "Apr 10, 2024",
         completedOn: "Apr 10, 2025",
         status: "completed" as const,
@@ -104,8 +99,8 @@ const CarpentryProjectsPage = () => {
   }, []);
 
   const currentHero = portfolioHeroData || fallbackHero;
-  const currentOngoingProjects = ongoingProjectsData || fallbackOngoingProjects;
-  const currentCompletedProjects = completedProjectsData || fallbackCompletedProjects;
+  const currentOngoingProjects = ongoingProjectsData && ongoingProjectsData.projects && ongoingProjectsData.projects.length > 0 ? ongoingProjectsData : fallbackOngoingProjects;
+  const currentCompletedProjects = completedProjectsData && completedProjectsData.projects && completedProjectsData.projects.length > 0 ? completedProjectsData : fallbackCompletedProjects;
 
   if (loading) {
     return (
@@ -119,12 +114,16 @@ const CarpentryProjectsPage = () => {
   }
 
   const ProjectCard = ({ project, isOngoing = false }: { project: any, isOngoing: boolean }) => {
-    const imageUrl = typeof project.image === 'string' 
-      ? project.image 
-      : project.image?.fields?.file?.url 
-        ? `https:${project.image.fields.file.url}`
-        : `/${Math.floor(Math.random() * 8) + 1}.png`;
-
+    let imageUrl = "/placeholder.png";
+    if (Array.isArray(project.image) && project.image[0]?.fields?.file?.url) {
+      imageUrl = project.image[0].fields.file.url.startsWith('http')
+        ? project.image[0].fields.file.url
+        : `https:${project.image[0].fields.file.url}`;
+    } else if (project.image?.fields?.file?.url) {
+      imageUrl = project.image.fields.file.url.startsWith('http')
+        ? project.image.fields.file.url
+        : `https:${project.image.fields.file.url}`;
+    }
     return (
       <div className="group bg-white rounded-lg shadow-lg overflow-hidden hover:shadow-xl transition-all duration-300 hover:bg-amber-50">
         <div className="relative">
@@ -148,12 +147,6 @@ const CarpentryProjectsPage = () => {
               <User className="w-4 h-4 mr-2 text-amber-600" />
               <span className="font-medium">Client:</span>
               <span className="ml-2 text-blue-600 group-hover:text-blue-700">{project.client}</span>
-            </div>
-            
-            <div className="flex items-center group-hover:text-amber-700 transition-colors duration-300">
-              <DollarSign className="w-4 h-4 mr-2 text-amber-600" />
-              <span className="font-medium">Value:</span>
-              <span className="ml-2">{project.value}</span>
             </div>
             
             <div className="flex items-center group-hover:text-amber-700 transition-colors duration-300">

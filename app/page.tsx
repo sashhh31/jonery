@@ -30,6 +30,7 @@ export default function Home() {
   const [galleryItemsData, setGalleryItemsData] = useState<GalleryItem[]>([]);
   const [testimonialsData, setTestimonialsData] = useState<TestimonialsSection | null>(null);
   const [loading, setLoading] = useState(true);
+  const [testimonialIndex, setTestimonialIndex] = useState(0);
 
   // Fallback data (current hardcoded data)
   const fallbackServices = [
@@ -406,33 +407,35 @@ export default function Home() {
         <div className="container">
           <h2 className="text-center text-lg text-gray-600 mb-2">{currentTestimonials.subtitle}</h2>
           <h3 className="text-center section-title mb-10">{currentTestimonials.title}</h3>
-
           <div className="relative">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              {currentTestimonials.testimonials.map((testimonial, index) => (
-                <TestimonialCard
-                  key={index}
-                  quote={testimonial.quote}
-                  name={testimonial.name}
-                  location={testimonial.location}
-                  image={testimonial.image.fields.file.url.startsWith('http') ? 
-                    testimonial.image.fields.file.url : 
-                    `https:${testimonial.image.fields.file.url}`
-                  }
-                />
-              ))}
+              {currentTestimonials.testimonials
+                .slice(testimonialIndex, testimonialIndex + 2)
+                .map((testimonial, index) => (
+                  <TestimonialCard
+                    key={index}
+                    quote={testimonial.quote}
+                    name={testimonial.name}
+                    location={testimonial.location}
+                    image={testimonial.image?.fields?.file?.url?.startsWith('http')
+                      ? testimonial.image.fields.file.url
+                      : `https:${testimonial.image.fields.file.url}`}
+                  />
+                ))}
             </div>
-
-            {/* Fixed Arrow Positioning - More Gap */}
-            <button 
+            <button
               className="absolute -left-16 top-1/2 -translate-y-1/2 bg-white rounded-full p-3 shadow-lg hover:shadow-xl transition-all duration-300 z-10"
               aria-label="Previous testimonial"
+              onClick={() => setTestimonialIndex((prev) => prev - 2 < 0 ? Math.max(0, currentTestimonials.testimonials.length - (currentTestimonials.testimonials.length % 2 === 0 ? 2 : 1)) : prev - 2)}
+              disabled={testimonialIndex === 0}
             >
               <ChevronLeft className="h-6 w-6 text-gray-600" />
             </button>
-            <button 
+            <button
               className="absolute -right-16 top-1/2 -translate-y-1/2 bg-white rounded-full p-3 shadow-lg hover:shadow-xl transition-all duration-300 z-10"
               aria-label="Next testimonial"
+              onClick={() => setTestimonialIndex((prev) => prev + 2 >= currentTestimonials.testimonials.length ? 0 : prev + 2)}
+              disabled={testimonialIndex + 2 >= currentTestimonials.testimonials.length}
             >
               <ChevronRight className="h-6 w-6 text-gray-600" />
             </button>
