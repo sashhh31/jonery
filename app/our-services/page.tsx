@@ -16,6 +16,14 @@ import {
   FeaturesSection,
   ServicesHero 
 } from '../../lib/contentful';
+import { Dialog, DialogTrigger, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogClose, DialogOverlay } from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { Select, SelectTrigger, SelectContent, SelectItem, SelectValue } from "@/components/ui/select";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { Button } from "@/components/ui/button";
+import { useToast } from "@/components/ui/use-toast";
+import emailjs from 'emailjs-com';
 
 const CarpentryServicesPage = () => {
   const [servicesData, setServicesData] = useState<Service[]>([]);
@@ -24,6 +32,81 @@ const CarpentryServicesPage = () => {
   const [featuresData, setFeaturesData] = useState<FeaturesSection | null>(null);
   const [servicesHeroData, setServicesHeroData] = useState<ServicesHero | null>(null);
   const [loading, setLoading] = useState(true);
+  const [open, setOpen] = useState(false);
+  const [selectedService, setSelectedService] = useState<string | null>(null);
+  const { toast } = useToast();
+  const [form, setForm] = useState({
+    name: '',
+    email: '',
+    phone: '',
+    projectType: '',
+    propertyLocation: '',
+    projectDescription: '',
+    preferredContact: '',
+    timeline: ''
+  });
+  const [submitting, setSubmitting] = useState(false);
+
+  const projectTypes = [
+    'Furniture',
+    'Kitchen',
+    'Doors/Windows',
+    'Commercial',
+    'Other'
+  ];
+  const contactMethods = [
+    'Email',
+    'Phone'
+  ];
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    setForm({ ...form, [e.target.name]: e.target.value });
+  };
+  const handleSelectChange = (value: string) => {
+    setForm({ ...form, projectType: value });
+  };
+  const handleRadioChange = (value: string) => {
+    setForm({ ...form, preferredContact: value });
+  };
+  const handleOpen = (service: string) => {
+    setSelectedService(service);
+    setForm(f => ({ ...f, projectType: service }));
+    setOpen(true);
+  };
+  const handleClose = () => {
+    setOpen(false);
+    setSelectedService(null);
+    setForm({
+      name: '',
+      email: '',
+      phone: '',
+      projectType: '',
+      propertyLocation: '',
+      projectDescription: '',
+      preferredContact: '',
+      timeline: ''
+    });
+  };
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setSubmitting(true);
+    try {
+      await emailjs.send(
+        'service_heoa1wi', // Provided EmailJS service ID
+        'template_fvykw0l', // Provided EmailJS template ID
+        {
+          ...form
+        },
+        'WW5cLJW0ox5H5lB8i' // Provided EmailJS public key
+      );
+      toast({ title: 'Enquiry sent!', description: 'We have received your enquiry and will contact you soon.' });
+      handleClose();
+    } catch (err) {
+      toast({ title: 'Failed to send enquiry', description: 'Please try again later.', variant: 'destructive' });
+    } finally {
+      setSubmitting(false);
+    }
+  };
 
   const fallbackHero = {
     title: "Professional Carpentry & Joinery Services in London",
@@ -120,7 +203,7 @@ const CarpentryServicesPage = () => {
   ];
 
   const fallbackProcess = {
-    subtitle: "How We Works",
+    subtitle: "How We Work",
     title: "Get Started With Our Process",
     description: "Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley.",
     processSteps: [
@@ -246,44 +329,7 @@ const CarpentryServicesPage = () => {
         </div>
       </div>
 
-      {/* Features Section - Dynamic from Contentful */}
-      <div className="py-16 bg-gray-100">
-        <div className="max-w-6xl mx-auto px-4">
-          <div className="mb-12">
-            <p className="text-amber-600 font-semibold mb-2">{currentFeatures.subtitle}</p>
-            <h2 className="text-4xl font-bold text-gray-800 mb-4">
-              {currentFeatures.title}
-            </h2>
-            <p className="text-gray-600 max-w-2xl">
-              {currentFeatures.description}
-            </p>
-          </div>
-
-          {/* Company Logo Watermark */}
-          <div className="absolute right-8 top-1/2 transform -translate-y-1/2 opacity-10">
-            <div className="w-32 h-32 rounded-full border-4 border-amber-300 flex items-center justify-center">
-              <span className="text-2xl font-bold text-amber-600">SJ</span>
-            </div>
-          </div>
-
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {currentFeatures.features.map((feature, index) => (
-              <div
-                key={index}
-                className={`p-6 rounded-lg ${feature.backgroundColor} ${feature.textColor || 'text-white'} shadow-lg hover:shadow-xl transition-all duration-300 hover:bg-green-600 hover:text-white group`}
-              >
-                <div className={`inline-flex items-center justify-center w-12 h-12 rounded-full mb-4 ${
-                  feature.iconBackgroundColor || 'bg-white bg-opacity-20'
-                } ${feature.textColor === 'text-gray-800' ? 'text-white group-hover:text-white' : ''} group-hover:bg-white group-hover:bg-opacity-20`}>
-                  {getIconComponent(feature.icon)}
-                </div>
-                <h3 className="text-xl font-bold mb-3 group-hover:text-white">{feature.title}</h3>
-                <p className="opacity-90 group-hover:text-white group-hover:opacity-100">{feature.description}</p>
-              </div>
-            ))}
-          </div>
-        </div>
-      </div>
+  
 
       {/* Services Section - Same as Home Page */}
       <section className="bg-[#f5f5f0] py-16 relative">
@@ -320,35 +366,91 @@ const CarpentryServicesPage = () => {
             {(servicesData.length > 0 ? servicesData : fallbackServices).map((item, idx) => (
               <div
                 key={idx}
-                className={`min-w-[280px] p-6 rounded-md shadow-sm ${
-                  item.backgroundColor || 'bg-amber-800'
-                } ${item.textColor || 'text-white'}`}
+                id={item.title.replace(/\s+/g, '-').replace(/&/g, '&').replace(/[^a-zA-Z0-9-&]/g, '')}
+                className={`relative min-w-[280px] p-6 pt-14 rounded-md shadow-sm ${item.backgroundColor || 'bg-amber-800'} ${item.textColor || 'text-white'} flex flex-col justify-between`}
+                style={{ minHeight: '320px' }}
               >
-                <div className="text-3xl mb-4 bg-white w-10 h-10 rounded-full flex items-center justify-center">
+                {/* Icon/Letter fixed in top-left */}
+                <div className="absolute top-4 left-4 text-3xl bg-white bg-opacity-20 w-12 h-12 rounded-full flex items-center justify-center shadow-md">
                   {item.icon || '🛠️'}
                 </div>
-                <h3 className="text-lg font-semibold mb-2">{item.title}</h3>
-                <p className="text-sm opacity-80">{item.description}</p>
+                <div className="flex-1 flex flex-col justify-between">
+                  <h3 className="text-lg font-semibold mb-2 mt-2">{item.title}</h3>
+                  <p className="text-sm opacity-90 mb-4">{item.description}</p>
+                </div>
+                <span
+                  role="button"
+                  tabIndex={0}
+                  onClick={() => handleOpen(item.title)}
+                  onKeyPress={e => { if (e.key === 'Enter' || e.key === ' ') handleOpen(item.title); }}
+                  className="mt-auto w-fit cursor-pointer text-base font-semibold transition-colors duration-200 relative group focus:outline-none focus:underline"
+                  style={{ display: 'inline-block' }}
+                >
+                  Know More
+                  <span className="inline-block transition-all duration-200 opacity-0 group-hover:opacity-100 group-hover:translate-x-1 ml-1">→</span>
+                  <span className="block h-0.5 bg-current scale-x-0 group-hover:scale-x-100 transition-transform duration-200 origin-left mt-1" style={{width:'100%'}}></span>
+                </span>
               </div>
             ))}
           </div>
 
-          <div className="flex justify-end mt-6 space-x-4">
-            <button 
-              className="w-10 h-10 rounded-full bg-[#e4cc7f] text-white flex items-center justify-center"
-              aria-label="Scroll left"
-              onClick={() => scroll("left")}
+          <Dialog open={open} onOpenChange={setOpen}>
+            {/* Custom DialogOverlay for blur and opacity */}
+            <DialogOverlay className="bg-black/60 backdrop-blur-sm" />
+            <DialogContent
+              className="bg-white/90 backdrop-blur-lg shadow-2xl rounded-2xl p-8 max-w-lg w-full transition-all duration-300 border border-gray-200"
             >
-              <ChevronLeft className="w-5 h-5" />
-            </button>
-            <button 
-              className="w-10 h-10 rounded-full bg-[#b49d2f] text-white flex items-center justify-center"
-              aria-label="Scroll right"
-              onClick={() => scroll("right")}
-            >
-              <ChevronRight className="w-5 h-5" />
-            </button>
-          </div>
+              <DialogHeader>
+                <DialogTitle>Project Enquiry Form</DialogTitle>
+              </DialogHeader>
+              <form onSubmit={handleSubmit} className="space-y-4">
+                <Input name="name" placeholder="Name" value={form.name} onChange={handleInputChange} required />
+                <Input name="email" type="email" placeholder="Email" value={form.email} onChange={handleInputChange} required />
+                <Input name="phone" type="tel" placeholder="Phone" value={form.phone} onChange={handleInputChange} />
+                <Select value={form.projectType} onValueChange={handleSelectChange}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Project Type" />
+                  </SelectTrigger>
+                  <SelectContent className="bg-white">
+                    {projectTypes.map(type => (
+                      <SelectItem key={type} value={type}>{type}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <Input name="propertyLocation" placeholder="Property Location" value={form.propertyLocation} onChange={handleInputChange} />
+                <Textarea name="projectDescription" placeholder="Project Description" value={form.projectDescription} onChange={handleInputChange} />
+                <div>
+                  <label className="block mb-1 font-medium">Preferred Contact Method</label>
+                  <RadioGroup value={form.preferredContact} onValueChange={handleRadioChange} className="flex gap-4">
+                    {contactMethods.map(method => (
+                      <div key={method} className="flex items-center gap-2">
+                        <RadioGroupItem value={method} id={method} />
+                        <label htmlFor={method} className="text-gray-700 cursor-pointer">{method}</label>
+                      </div>
+                    ))}
+                  </RadioGroup>
+                  {form.preferredContact === 'Phone' && (
+                    <Input
+                      name="phone"
+                      type="tel"
+                      placeholder="Enter your phone number"
+                      value={form.phone}
+                      onChange={handleInputChange}
+                      required
+                      className="mt-2"
+                    />
+                  )}
+                </div>
+                <Input name="timeline" placeholder="Timeline" value={form.timeline} onChange={handleInputChange} />
+                <DialogFooter>
+                  <Button type="submit" disabled={submitting} className="text-white">{submitting ? 'Sending...' : 'Send Enquiry'}</Button>
+                  <DialogClose asChild>
+                    <Button type="button" variant="outline" onClick={handleClose}>Cancel</Button>
+                  </DialogClose>
+                </DialogFooter>
+              </form>
+            </DialogContent>
+          </Dialog>
         </div>
       </section>
 

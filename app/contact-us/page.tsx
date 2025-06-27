@@ -3,6 +3,8 @@ import React, { useState, useEffect } from 'react';
 import { Phone, Mail, MapPin, Menu, X, ChevronDown } from 'lucide-react';
 import Image from 'next/image';
 import { getContactHero, getContactFormSection, getOfficeAddressesSection, ContactHero, ContactFormSection, OfficeAddressesSection } from '../../lib/contentful';
+import emailjs from 'emailjs-com';
+import { useToast } from "@/components/ui/use-toast";
 
 const ShayJoineryContact = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -11,14 +13,19 @@ const ShayJoineryContact = () => {
   const [officeAddressesData, setOfficeAddressesData] = useState<OfficeAddressesSection | null>(null);
   const [activeLocation, setActiveLocation] = useState(0);
   const [loading, setLoading] = useState(true);
+  const [submitting, setSubmitting] = useState(false);
+  const { toast } = useToast();
   const [formData, setFormData] = useState({
     name: '',
     email: '',
     phone: '',
     projectType: 'Furniture',
     propertyLocation: '',
-    projectDescription: ''
+    projectDescription: '',
+    preferredContact: '',
+    timeline: ''
   });
+  const contactMethods = ['Email', 'Phone'];
 
   const fallbackHero = {
     title: "Get in Touch with London's Expert Carpenters",
@@ -99,12 +106,46 @@ const ShayJoineryContact = () => {
     fetchContactData();
   }, []);
 
-  const handleInputChange = (e:any) => {
+  const handleInputChange = (e: any) => {
     const { name, value } = e.target;
     setFormData(prev => ({
       ...prev,
       [name]: value
     }));
+  };
+
+  const handleRadioChange = (value: string) => {
+    setFormData(prev => ({ ...prev, preferredContact: value }));
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setSubmitting(true);
+    try {
+      await emailjs.send(
+        'service_heoa1wi',
+        'template_fvykw0l',
+        {
+          ...formData
+        },
+        'WW5cLJW0ox5H5lB8i'
+      );
+      toast({ title: 'Enquiry sent!', description: 'We have received your enquiry and will contact you soon.' });
+      setFormData({
+        name: '',
+        email: '',
+        phone: '',
+        projectType: 'Furniture',
+        propertyLocation: '',
+        projectDescription: '',
+        preferredContact: '',
+        timeline: ''
+      });
+    } catch (err) {
+      toast({ title: 'Failed to send enquiry', description: 'Please try again later.', variant: 'destructive' });
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   const currentHero = contactHeroData || fallbackHero;
@@ -159,7 +200,7 @@ const ShayJoineryContact = () => {
             <h3 className="text-4xl font-bold text-navy-900">{currentForm.subtitle}</h3>
           </div>
 
-          <div className="grid md:grid-cols-2 gap-8">
+          <form onSubmit={handleSubmit} className="grid md:grid-cols-2 gap-8">
             <div className="space-y-6">
               <div>
                 <label className="block text-gray-700 font-medium mb-2">Name</label>
@@ -243,14 +284,45 @@ const ShayJoineryContact = () => {
                 ></textarea>
               </div>
 
+              <div>
+                <label className="block text-gray-700 font-medium mb-2">Preferred Contact Method</label>
+                <div className="flex gap-4">
+                  {contactMethods.map(method => (
+                    <label key={method} className="flex items-center gap-2">
+                      <input
+                        type="radio"
+                        name="preferredContact"
+                        value={method}
+                        checked={formData.preferredContact === method}
+                        onChange={() => handleRadioChange(method)}
+                      />
+                      {method}
+                    </label>
+                  ))}
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-gray-700 font-medium mb-2">Timeline</label>
+                <input
+                  type="text"
+                  name="timeline"
+                  value={formData.timeline}
+                  onChange={handleInputChange}
+                  placeholder="Timeline"
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-amber-500"
+                />
+              </div>
+
               <button
-                type="button"
+                type="submit"
                 className="w-full py-3 px-6 bg-amber-600 hover:bg-amber-700 text-white font-semibold rounded-lg transition-colors duration-200"
+                disabled={submitting}
               >
-                {currentForm.buttonText}
+                {submitting ? 'Sending...' : currentForm.buttonText}
               </button>
             </div>
-          </div>
+          </form>
         </div>
       </section>
 

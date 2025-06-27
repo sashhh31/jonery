@@ -38,6 +38,81 @@ export default function Home() {
   const [galleryItemsData, setGalleryItemsData] = useState<GalleryItem[]>([]);
   const [testimonialsData, setTestimonialsData] = useState<TestimonialsSection | null>(null);
   const [loading, setLoading] = useState(true);
+  const [testimonialIndex, setTestimonialIndex] = useState(0);
+  // Dialog and form state for service enquiry
+  const [open, setOpen] = useState(false);
+  const [selectedService, setSelectedService] = useState<string | null>(null);
+  const { toast } = useToast();
+  const [form, setForm] = useState({
+    name: '',
+    email: '',
+    phone: '',
+    projectType: '',
+    propertyLocation: '',
+    projectDescription: '',
+    preferredContact: '',
+    timeline: ''
+  });
+  const [submitting, setSubmitting] = useState(false);
+  const projectTypes = [
+    'Furniture',
+    'Kitchen',
+    'Doors/Windows',
+    'Commercial',
+    'Other'
+  ];
+  const contactMethods = [
+    'Email',
+    'Phone'
+  ];
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    setForm({ ...form, [e.target.name]: e.target.value });
+  };
+  const handleSelectChange = (value: string) => {
+    setForm({ ...form, projectType: value });
+  };
+  const handleRadioChange = (value: string) => {
+    setForm({ ...form, preferredContact: value });
+  };
+  const handleOpen = (service: string) => {
+    setSelectedService(service);
+    setForm(f => ({ ...f, projectType: service }));
+    setOpen(true);
+  };
+  const handleClose = () => {
+    setOpen(false);
+    setSelectedService(null);
+    setForm({
+      name: '',
+      email: '',
+      phone: '',
+      projectType: '',
+      propertyLocation: '',
+      projectDescription: '',
+      preferredContact: '',
+      timeline: ''
+    });
+  };
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setSubmitting(true);
+    try {
+      await emailjs.send(
+        'service_heoa1wi',
+        'template_fvykw0l',
+        {
+          ...form
+        },
+        'WW5cLJW0ox5H5lB8i'
+      );
+      toast({ title: 'Enquiry sent!', description: 'We have received your enquiry and will contact you soon.' });
+      handleClose();
+    } catch (err) {
+      toast({ title: 'Failed to send enquiry', description: 'Please try again later.', variant: 'destructive' });
+    } finally {
+      setSubmitting(false);
+    }
+  };
 
   // Fallback data (current hardcoded data)
   const fallbackServices = [
@@ -53,7 +128,7 @@ export default function Home() {
       title: "Kitchen Carpentry Services",
       description:
         "Create your dream kitchen with custom carpentry—handmade cabinets, solid wood worktops, islands, pantries, and tailored storage solutions built just for you.",
-      icon: "🍽️",
+      icon: "🍽",
       backgroundColor: "bg-white",
       textColor: "text-black",
     },
@@ -69,7 +144,7 @@ export default function Home() {
       title: "Architectural Joinery",
       description:
         "Add charm with custom cornices, ceiling roses, and timber mouldings crafted to perfection by experienced joiners.",
-      icon: "🛠️",
+      icon: "🛠",
       backgroundColor: "bg-white",
       textColor: "text-black",
     },
@@ -238,55 +313,6 @@ export default function Home() {
     ]
   };
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-    setForm({ ...form, [e.target.name]: e.target.value });
-  };
-  const handleSelectChange = (value: string) => {
-    setForm({ ...form, projectType: value });
-  };
-  const handleRadioChange = (value: string) => {
-    setForm({ ...form, preferredContact: value });
-  };
-  const handleOpen = (service: string) => {
-    setSelectedService(service);
-    setForm(f => ({ ...f, projectType: service }));
-    setDialogOpen(true);
-  };
-  const handleClose = () => {
-    setDialogOpen(false);
-    setSelectedService(null);
-    setForm({
-      name: '',
-      email: '',
-      phone: '',
-      projectType: '',
-      propertyLocation: '',
-      projectDescription: '',
-      preferredContact: '',
-      timeline: ''
-    });
-  };
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setSubmitting(true);
-    try {
-      await emailjs.send(
-        'service_heoa1wi',
-        'template_fvykw0l',
-        {
-          ...form
-        },
-        'WW5cLJW0ox5H5lB8i'
-      );
-      toast({ title: 'Enquiry sent!', description: 'We have received your enquiry and will contact you soon.' });
-      handleClose();
-    } catch (err) {
-      toast({ title: 'Failed to send enquiry', description: 'Please try again later.', variant: 'destructive' });
-    } finally {
-      setSubmitting(false);
-    }
-  };
-
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -304,13 +330,13 @@ export default function Home() {
       <section className="relative bg-[#925422] py-32 text-white overflow-hidden">
         <div className="absolute inset-0 z-0">
           <Image
-            src={currentHero.backgroundImage ? 
-              `https:${currentHero.backgroundImage.fields.file.url}` : 
+            src={currentHero.backgroundImage && currentHero.backgroundImage.fields && currentHero.backgroundImage.fields.file && currentHero.backgroundImage.fields.file.url ?
+              `https:${currentHero.backgroundImage.fields.file.url}` :
               `/${Math.floor(Math.random() * 8) + 1}.png`
             }
             alt="Background"
             fill
-            style={{ objectFit: 'cover' }}
+            objectFit="cover"
             className="opacity-20"
           />
           <div className="absolute inset-0 bg-[#855024] opacity-40"></div>
@@ -348,8 +374,8 @@ export default function Home() {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-12 mt-12">
             <div>
               <Image
-                src={currentAbout.image ? 
-                  `https:${currentAbout.image.fields.file.url}` : 
+                src={currentAbout.image && currentAbout.image.fields && currentAbout.image.fields.file && currentAbout.image.fields.file.url ?
+                  `https:${currentAbout.image.fields.file.url}` :
                   "/1.png"
                 }
                 alt="Our workshop"
@@ -376,126 +402,133 @@ export default function Home() {
 
       {/* About Us Section */}
       <section className="bg-[#f5f5f0] py-16 relative">
-        <div className="absolute right-0 top-0 h-full w-[300px] bg-contain bg-no-repeat bg-right" 
-             style={{ 
-               backgroundImage: currentServicesHeader.backgroundImage ? 
-                 `url(https:${currentServicesHeader.backgroundImage.fields.file.url})` : 
-                 'url("/Ornament.png")' 
-             }} 
-        />
-        <div className="max-w-7xl mx-auto px-6 relative z-10">
-          <p className="text-[#b46931] font-medium mb-2">
-            {currentServicesHeader.subtitle || "Our Services"}
-          </p>
-          <h2 className="text-3xl font-bold text-[#1b1b1b] mb-4">
-            {currentServicesHeader.title ? (
-              currentServicesHeader.title.split(' ').length > 6 ? (
-                <>
-                  {currentServicesHeader.title.split(' ').slice(0, Math.ceil(currentServicesHeader.title.split(' ').length / 2)).join(' ')} <br />
-                  {currentServicesHeader.title.split(' ').slice(Math.ceil(currentServicesHeader.title.split(' ').length / 2)).join(' ')}
-                </>
-              ) : (
-                currentServicesHeader.title
-              )
-            ) : (
-              <>Custom Furniture & Interior <br />Woodwork Built to Last.</>
-            )}
-          </h2>
-          <p className="text-gray-600 mb-12 max-w-2xl">
-            {currentServicesHeader.description || "Our skilled London joiners combine time-honoured techniques with contemporary innovation to deliver"}
-          </p>
+      <div className="absolute right-0 top-0 h-full w-[300px] bg-contain bg-no-repeat bg-right"
+           style={{
+             backgroundImage: currentServicesHeader.backgroundImage && currentServicesHeader.backgroundImage.fields && currentServicesHeader.backgroundImage.fields.file && currentServicesHeader.backgroundImage.fields.file.url ?
+               `url('https:${currentServicesHeader.backgroundImage.fields.file.url}')` :
+               'url("/Ornament.png")'
+           }}
+      />
+      <div className="max-w-7xl mx-auto px-6 relative z-10">
+        <p className="text-[#b46931] font-medium mb-2">{currentServicesHeader.subtitle}</p>
+        <h2 className="text-3xl font-bold text-[#1b1b1b] mb-4">
+          {currentServicesHeader.title.split(' ').length > 6 ? (
+            <>
+              {currentServicesHeader.title.split(' ').slice(0, Math.ceil(currentServicesHeader.title.split(' ').length / 2)).join(' ')} <br />
+              {currentServicesHeader.title.split(' ').slice(Math.ceil(currentServicesHeader.title.split(' ').length / 2)).join(' ')}
+            </>
+          ) : (
+            currentServicesHeader.title
+          )}
+        </h2>
+        <p className="text-gray-600 mb-12 max-w-2xl">
+          {currentServicesHeader.description}
+        </p>
 
-          <div className="flex gap-6 overflow-x-auto pb-4 scrollbar-hide">
-            {(currentServices.length > 0 ? currentServices : fallbackServices).map((item, idx) => (
-              <div
-                key={idx}
-                id={item.title.replace(/\s+/g, '-').replace(/&/g, '&').replace(/[^a-zA-Z0-9-&]/g, '')}
-                className={`relative min-w-[280px] p-6 pt-14 rounded-md shadow-sm ${item.backgroundColor || 'bg-amber-800'} ${item.textColor || 'text-white'} flex flex-col justify-between`}
-                style={{ minHeight: '320px' }}
-              >
-                {/* Icon/Letter fixed in top-left */}
-                <div className="absolute top-4 left-4 text-3xl bg-white bg-opacity-20 w-12 h-12 rounded-full flex items-center justify-center shadow-md">
-                  {item.icon || '🛠️'}
-                </div>
-                <div className="flex-1 flex flex-col justify-between">
-                  <h3 className="text-lg font-semibold mb-2 mt-2">{item.title}</h3>
-                  <p className="text-sm opacity-90 mb-4">{item.description}</p>
-                </div>
-                <span
-                  role="button"
-                  tabIndex={0}
-                  onClick={() => handleOpen(item.title)}
-                  onKeyPress={e => { if (e.key === 'Enter' || e.key === ' ') handleOpen(item.title); }}
-                  className="mt-auto w-fit cursor-pointer text-base font-semibold transition-colors duration-200 relative group focus:outline-none focus:underline"
-                  style={{ display: 'inline-block' }}
-                >
-                  Know More
-                  <span className="inline-block transition-all duration-200 opacity-0 group-hover:opacity-100 group-hover:translate-x-1 ml-1">→</span>
-                  <span className="block h-0.5 bg-current scale-x-0 group-hover:scale-x-100 transition-transform duration-200 origin-left mt-1" style={{width:'100%'}}></span>
-                </span>
-              </div>
-            ))}
-          </div>
-
-          <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-            {/* Custom DialogOverlay for blur and opacity */}
-            <DialogOverlay className="bg-black/60 backdrop-blur-sm" />
-            <DialogContent
-              className="bg-white/90 backdrop-blur-lg shadow-2xl rounded-2xl p-8 max-w-lg w-full transition-all duration-300 border border-gray-200"
+        <div className="flex gap-6 overflow-x-auto pb-4 scrollbar-hide" ref={scrollRef}>
+          {currentServices.map((item, idx) => (
+            <div
+              key={idx}
+              className={`relative min-w-[280px] p-6 pt-14 rounded-md shadow-sm ${item.backgroundColor} ${item.textColor} flex flex-col justify-between`}
+              style={{ minHeight: '320px' }}
             >
-              <DialogHeader>
-                <DialogTitle>Project Enquiry Form</DialogTitle>
-              </DialogHeader>
-              <form onSubmit={handleSubmit} className="space-y-4">
-                <Input name="name" placeholder="Name" value={form.name} onChange={handleInputChange} required />
-                <Input name="email" type="email" placeholder="Email" value={form.email} onChange={handleInputChange} required />
-                <Input name="phone" type="tel" placeholder="Phone" value={form.phone} onChange={handleInputChange} />
-                <Select value={form.projectType} onValueChange={handleSelectChange}>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Project Type" />
-                  </SelectTrigger>
-                  <SelectContent className="bg-white">
-                    {projectTypes.map(type => (
-                      <SelectItem key={type} value={type}>{type}</SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-                <Input name="propertyLocation" placeholder="Property Location" value={form.propertyLocation} onChange={handleInputChange} />
-                <Textarea name="projectDescription" placeholder="Project Description" value={form.projectDescription} onChange={handleInputChange} />
-                <div>
-                  <label className="block mb-1 font-medium">Preferred Contact Method</label>
-                  <RadioGroup value={form.preferredContact} onValueChange={handleRadioChange} className="flex gap-4">
-                    {contactMethods.map(method => (
-                      <div key={method} className="flex items-center gap-2">
-                        <RadioGroupItem value={method} id={method} />
-                        <label htmlFor={method} className="text-gray-700 cursor-pointer">{method}</label>
-                      </div>
-                    ))}
-                  </RadioGroup>
-                  {form.preferredContact === 'Phone' && (
-                    <Input
-                      name="phone"
-                      type="tel"
-                      placeholder="Enter your phone number"
-                      value={form.phone}
-                      onChange={handleInputChange}
-                      required
-                      className="mt-2"
-                    />
-                  )}
-                </div>
-                <Input name="timeline" placeholder="Timeline" value={form.timeline} onChange={handleInputChange} />
-                <DialogFooter>
-                  <Button type="submit" disabled={submitting} className="text-white">{submitting ? 'Sending...' : 'Send Enquiry'}</Button>
-                  <DialogClose asChild>
-                    <Button type="button" variant="outline" onClick={handleClose}>Cancel</Button>
-                  </DialogClose>
-                </DialogFooter>
-              </form>
-            </DialogContent>
-          </Dialog>
+              {/* Icon/Letter fixed in top-left */}
+              <div
+                className={`absolute top-4 left-4 text-3xl w-12 h-12 rounded-full flex items-center justify-center shadow-md ${item.textColor === 'text-white' ? 'bg-white' : 'bg-[#925422]'}`}
+              >
+                <span className={item.textColor === 'text-white' ? 'text-black' : 'text-white'}>{item.icon}</span>
+              </div>
+              <div className="flex-1 flex flex-col justify-between">
+                <h3 className="text-lg font-semibold mb-2 mt-2">{item.title}</h3>
+                <p className="text-sm opacity-80 mb-4">{item.description}</p>
+              </div>
+              <span
+                role="button"
+                tabIndex={0}
+                onClick={() => handleOpen(item.title)}
+                onKeyPress={e => { if (e.key === 'Enter' || e.key === ' ') handleOpen(item.title); }}
+                className={`mt-auto w-fit cursor-pointer text-base font-semibold transition-colors duration-200 relative group focus:outline-none focus:underline ${item.textColor}`}
+                style={{ display: 'inline-block' }}
+              >
+                Know More
+                <span className="inline-block transition-all duration-200 opacity-0 group-hover:opacity-100 group-hover:translate-x-1 ml-1">→</span>
+                <span className="block h-0.5 bg-current scale-x-0 group-hover:scale-x-100 transition-transform duration-200 origin-left mt-1" style={{width:'100%'}}></span>
+              </span>
+            </div>
+          ))}
         </div>
-      </section>
+        <Dialog open={open} onOpenChange={setOpen}>
+          <DialogOverlay className="bg-black/60 backdrop-blur-sm" />
+          <DialogContent className="bg-white/90 backdrop-blur-lg shadow-2xl rounded-2xl p-8 max-w-lg w-full transition-all duration-300 border border-gray-200">
+            <DialogHeader>
+              <DialogTitle>Project Enquiry Form</DialogTitle>
+            </DialogHeader>
+            <form onSubmit={handleSubmit} className="space-y-4">
+              <Input name="name" placeholder="Name" value={form.name} onChange={handleInputChange} required />
+              <Input name="email" type="email" placeholder="Email" value={form.email} onChange={handleInputChange} required />
+              <Input name="phone" type="tel" placeholder="Phone" value={form.phone} onChange={handleInputChange} />
+              <Select value={form.projectType} onValueChange={handleSelectChange}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Project Type" />
+                </SelectTrigger>
+                <SelectContent className="bg-white">
+                  {projectTypes.map(type => (
+                    <SelectItem key={type} value={type}>{type}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <Input name="propertyLocation" placeholder="Property Location" value={form.propertyLocation} onChange={handleInputChange} />
+              <Textarea name="projectDescription" placeholder="Project Description" value={form.projectDescription} onChange={handleInputChange} />
+              <div>
+                <label className="block mb-1 font-medium">Preferred Contact Method</label>
+                <RadioGroup value={form.preferredContact} onValueChange={handleRadioChange} className="flex gap-4">
+                  {contactMethods.map(method => (
+                    <div key={method} className="flex items-center gap-2">
+                      <RadioGroupItem value={method} id={method} />
+                      <label htmlFor={method} className="text-gray-700 cursor-pointer">{method}</label>
+                    </div>
+                  ))}
+                </RadioGroup>
+                {form.preferredContact === 'Phone' && (
+                  <Input
+                    name="phone"
+                    type="tel"
+                    placeholder="Enter your phone number"
+                    value={form.phone}
+                    onChange={handleInputChange}
+                    required
+                    className="mt-2"
+                  />
+                )}
+              </div>
+              <Input name="timeline" placeholder="Timeline" value={form.timeline} onChange={handleInputChange} />
+              <DialogFooter>
+                <Button type="submit" disabled={submitting} className="text-white">{submitting ? 'Sending...' : 'Send Enquiry'}</Button>
+                <DialogClose asChild>
+                  <Button type="button" variant="outline" onClick={handleClose}>Cancel</Button>
+                </DialogClose>
+              </DialogFooter>
+            </form>
+          </DialogContent>
+        </Dialog>
+        <div className="flex justify-end mt-6 space-x-4">
+          <button 
+            className="w-10 h-10 rounded-full bg-[#e4cc7f] text-white flex items-center justify-center"
+            aria-label="Scroll left"
+            onClick={() => scroll("left")}
+          >
+            <ChevronLeft className="w-5 h-5" />
+          </button>
+          <button 
+            className="w-10 h-10 rounded-full bg-[#b49d2f] text-white flex items-center justify-center"
+            aria-label="Scroll right"
+            onClick={() => scroll("right")}
+          >
+            <ChevronRight className="w-5 h-5" />
+          </button>
+        </div>
+      </div>
+    </section>
 
       {/* Gallery Section - Dynamic from Contentful */}
       <section className="bg-[#f5f5f0] section-padding">
@@ -507,12 +540,12 @@ export default function Home() {
             {currentGallery.galleryItems.map((item, index) => (
               <div key={index} className={`${item.gridSpan} overflow-hidden`}>
                 <Image
-                  src={item.image.fields.file.url.startsWith('http') ? 
-                    item.image.fields.file.url : 
+                  src={item.image.fields.file.url.startsWith('http') ?
+                    item.image.fields.file.url :
                     `https:${item.image.fields.file.url}`
                   }
                   alt={item.title}
-                  width={item.gridSpan === 'col-span-full' ? 1200 : 
+                  width={item.gridSpan === 'col-span-full' ? 1200 :
                          item.gridSpan === 'col-span-1 md:col-span-2' ? 800 : 400}
                   height={item.gridSpan === 'col-span-full' ? 400 : 300}
                   className="w-full h-full object-cover"
@@ -537,9 +570,11 @@ export default function Home() {
                     quote={testimonial.quote}
                     name={testimonial.name}
                     location={testimonial.location}
-                    image={testimonial.image?.fields?.file?.url?.startsWith('http')
+                    image={testimonial.image && testimonial.image.fields && testimonial.image.fields.file && testimonial.image.fields.file.url && testimonial.image.fields.file.url.startsWith('http')
                       ? testimonial.image.fields.file.url
-                      : `https:${testimonial.image.fields.file.url}`}
+                      : testimonial.image && testimonial.image.fields && testimonial.image.fields.file && testimonial.image.fields.file.url
+                        ? `https:${testimonial.image.fields.file.url}`
+                        : "/placeholder.svg"}
                   />
                 ))}
             </div>
