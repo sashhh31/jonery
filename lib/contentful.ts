@@ -823,7 +823,6 @@ export async function getPortfolioHero(): Promise<PortfolioHero | null> {
 export interface Project {
   title: string;
   client: string;
-  value: string;
   startedOn: string;
   completedOn: string;
   status: 'ongoing' | 'completed';
@@ -859,7 +858,6 @@ export async function getOngoingProjectsSection(): Promise<OngoingProjectsSectio
       projects: (entry.fields.projects || []).map((project: any) => ({
         title: project.fields.title || '',
         client: project.fields.client || '',
-        value: project.fields.value || '',
         startedOn: project.fields.startedOn || '',
         completedOn: project.fields.completedOn || '',
         status: project.fields.status || 'ongoing',
@@ -884,7 +882,6 @@ export async function getOngoingProjects(): Promise<Project[]> {
     return entries.items.map((entry: any) => ({
       title: entry.fields.title || '',
       client: entry.fields.client || '',
-      value: entry.fields.value || '',
       startedOn: entry.fields.startedOn || '',
       completedOn: entry.fields.completedOn || '',
       status: entry.fields.status || 'ongoing',
@@ -919,7 +916,6 @@ export async function getCompletedProjectsSection(): Promise<CompletedProjectsSe
       projects: (entry.fields.projects || []).map((project: any) => ({
         title: project.fields.title || '',
         client: project.fields.client || '',
-        value: project.fields.value || '',
         startedOn: project.fields.startedOn || '',
         completedOn: project.fields.completedOn || '',
         status: project.fields.status || 'completed',
@@ -944,7 +940,6 @@ export async function getCompletedProjects(): Promise<Project[]> {
     return entries.items.map((entry: any) => ({
       title: entry.fields.title || '',
       client: entry.fields.client || '',
-      value: entry.fields.value || '',
       startedOn: entry.fields.startedOn || '',
       completedOn: entry.fields.completedOn || '',
       status: entry.fields.status || 'completed',

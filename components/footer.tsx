@@ -169,7 +169,7 @@ export default function Footer() {
 function FooterLink({ href, label }: { href: string; label: string }) {
   return (
     <li>
-      <Link href={href} className="text-sm hover:underline">
+      <Link href={href || '#'} className="text-sm hover:underline">
         {label}
       </Link>
     </li>
