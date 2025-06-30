@@ -3,7 +3,6 @@ import React, { useState, useEffect } from 'react';
 import { Phone, Mail, MapPin, Menu, X, ChevronDown } from 'lucide-react';
 import Image from 'next/image';
 import { getContactHero, getContactFormSection, getOfficeAddressesSection, ContactHero, ContactFormSection, OfficeAddressesSection } from '../../lib/contentful';
-import emailjs from 'emailjs-com';
 import { useToast } from "@/components/ui/use-toast";
 
 const ShayJoineryContact = () => {
@@ -23,7 +22,7 @@ const ShayJoineryContact = () => {
     propertyLocation: '',
     projectDescription: '',
     preferredContact: '',
-    timeline: ''
+    Timeline: ''
   });
   const contactMethods = ['Email', 'Phone'];
 
@@ -42,6 +41,7 @@ const ShayJoineryContact = () => {
       "Kitchen Carpentry",
       "Doors & Windows",
       "Architectural Joinery",
+      'Flooring Services',
       "Commercial"
     ]
   };
@@ -122,14 +122,12 @@ const ShayJoineryContact = () => {
     e.preventDefault();
     setSubmitting(true);
     try {
-      await emailjs.send(
-        'service_heoa1wi',
-        'template_fvykw0l',
-        {
-          ...formData
-        },
-        'WW5cLJW0ox5H5lB8i'
-      );
+      const response = await fetch('/api/send-email', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(formData)
+      });
+      if (!response.ok) throw new Error('Failed to send');
       toast({ title: 'Enquiry sent!', description: 'We have received your enquiry and will contact you soon.' });
       setFormData({
         name: '',
@@ -139,7 +137,7 @@ const ShayJoineryContact = () => {
         propertyLocation: '',
         projectDescription: '',
         preferredContact: '',
-        timeline: ''
+        Timeline: ''
       });
     } catch (err) {
       toast({ title: 'Failed to send enquiry', description: 'Please try again later.', variant: 'destructive' });
@@ -183,10 +181,14 @@ const ShayJoineryContact = () => {
           <div className="absolute inset-0 bg-[#855024] opacity-60"></div>
         </div>
         <div className="max-w-4xl mx-auto px-4 text-center relative z-10">
-          <h1 className="text-4xl md:text-5xl font-bold mb-6">
-            {currentHero.title}
+          <h1 className="text-5xl md:text-6xl font-bold mb-4">
+            {(() => {
+              const words = currentHero.title.split(' ');
+              const mid = Math.ceil(words.length / 2);
+              return <>{words.slice(0, mid).join(' ')}<br />{words.slice(mid).join(' ')}</>;
+            })()}
           </h1>
-          <p className="text-xl opacity-90 leading-relaxed">
+          <p className="text-xl text-gray-200 mb-8">
             {currentHero.subtitle}
           </p>
         </div>
@@ -306,10 +308,10 @@ const ShayJoineryContact = () => {
                 <label className="block text-gray-700 font-medium mb-2">Timeline</label>
                 <input
                   type="text"
-                  name="timeline"
-                  value={formData.timeline}
+                  name="Timeline"
+                  value={formData.Timeline}
                   onChange={handleInputChange}
-                  placeholder="Timeline"
+                  placeholder="Tell us how soon you want your project started!"
                   className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-amber-500"
                 />
               </div>

@@ -23,7 +23,7 @@ import { Select, SelectTrigger, SelectContent, SelectItem, SelectValue } from "@
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/components/ui/use-toast";
-import emailjs from 'emailjs-com';
+import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem } from "@/components/ui/dropdown-menu";
 
 const CarpentryServicesPage = () => {
   const [servicesData, setServicesData] = useState<Service[]>([]);
@@ -35,7 +35,16 @@ const CarpentryServicesPage = () => {
   const [open, setOpen] = useState(false);
   const [selectedService, setSelectedService] = useState<string | null>(null);
   const { toast } = useToast();
-  const [form, setForm] = useState({
+  const [form, setForm] = useState<{
+    name: string;
+    email: string;
+    phone: string;
+    projectType: string;
+    propertyLocation: string;
+    projectDescription: string;
+    preferredContact: string;
+    Timeline: string;
+  }>({
     name: '',
     email: '',
     phone: '',
@@ -43,7 +52,7 @@ const CarpentryServicesPage = () => {
     propertyLocation: '',
     projectDescription: '',
     preferredContact: '',
-    timeline: ''
+    Timeline: ''
   });
   const [submitting, setSubmitting] = useState(false);
 
@@ -51,6 +60,7 @@ const CarpentryServicesPage = () => {
     'Furniture',
     'Kitchen',
     'Doors/Windows',
+    'Flooring Services',
     'Commercial',
     'Other'
   ];
@@ -70,7 +80,7 @@ const CarpentryServicesPage = () => {
   };
   const handleOpen = (service: string) => {
     setSelectedService(service);
-    setForm(f => ({ ...f, projectType: service }));
+    // Don't auto-fill the projectType, let user select manually
     setOpen(true);
   };
   const handleClose = () => {
@@ -84,21 +94,23 @@ const CarpentryServicesPage = () => {
       propertyLocation: '',
       projectDescription: '',
       preferredContact: '',
-      timeline: ''
+      Timeline: ''
     });
   };
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!form.projectType || form.projectType === '') {
+      toast({ title: 'Please select a service type', description: 'You must select a project type before submitting.', variant: 'destructive' });
+      return;
+    }
     setSubmitting(true);
     try {
-      await emailjs.send(
-        'service_heoa1wi', // Provided EmailJS service ID
-        'template_fvykw0l', // Provided EmailJS template ID
-        {
-          ...form
-        },
-        'WW5cLJW0ox5H5lB8i' // Provided EmailJS public key
-      );
+      const response = await fetch('/api/send-email', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(form)
+      });
+      if (!response.ok) throw new Error('Failed to send');
       toast({ title: 'Enquiry sent!', description: 'We have received your enquiry and will contact you soon.' });
       handleClose();
     } catch (err) {
@@ -319,11 +331,16 @@ const CarpentryServicesPage = () => {
         />
         <div className="absolute inset-0 bg-[#855024] opacity-60"></div>
         
-        <div className="relative max-w-4xl mx-auto px-4 text-center">
-          <h1 className="text-5xl md:text-6xl font-bold mb-6">
-            {servicesHeroData?.title || "Professional Carpentry & Joinery Services in London"}
+        <div className="max-w-4xl mx-auto px-4 text-center relative z-10">
+          <h1 className="text-5xl md:text-6xl font-bold mb-4">
+            {(() => {
+              const title = servicesHeroData?.title || "Professional Carpentry & Joinery Services in London";
+              const words = title.split(' ');
+              const mid = Math.ceil(words.length / 2);
+              return <>{words.slice(0, mid).join(' ')}<br />{words.slice(mid).join(' ')}</>;
+            })()}
           </h1>
-          <p className="text-xl md:text-lg text-gray-200 leading-relaxed">
+          <p className="text-xl text-gray-200 mb-8">
             {servicesHeroData?.subtitle || "Stay Joinery offers comprehensive carpentry and joinery services throughout Greater London. Our skilled craftsmen deliver exceptional results, from bespoke furniture to commercial fit-outs."}
           </p>
         </div>
@@ -386,7 +403,7 @@ const CarpentryServicesPage = () => {
                   className="mt-auto w-fit cursor-pointer text-base font-semibold transition-colors duration-200 relative group focus:outline-none focus:underline"
                   style={{ display: 'inline-block' }}
                 >
-                  Know More
+                Request Free Estimate
                   <span className="inline-block transition-all duration-200 opacity-0 group-hover:opacity-100 group-hover:translate-x-1 ml-1">→</span>
                   <span className="block h-0.5 bg-current scale-x-0 group-hover:scale-x-100 transition-transform duration-200 origin-left mt-1" style={{width:'100%'}}></span>
                 </span>
@@ -409,7 +426,7 @@ const CarpentryServicesPage = () => {
                 <Input name="phone" type="tel" placeholder="Phone" value={form.phone} onChange={handleInputChange} />
                 <Select value={form.projectType} onValueChange={handleSelectChange}>
                   <SelectTrigger>
-                    <SelectValue placeholder="Project Type" />
+                    <SelectValue placeholder="Service" />
                   </SelectTrigger>
                   <SelectContent className="bg-white">
                     {projectTypes.map(type => (
@@ -441,9 +458,9 @@ const CarpentryServicesPage = () => {
                     />
                   )}
                 </div>
-                <Input name="timeline" placeholder="Timeline" value={form.timeline} onChange={handleInputChange} />
+                <Input name="Timeline" placeholder="Tell us how soon you want your project started!" value={form.Timeline} onChange={handleInputChange} />
                 <DialogFooter>
-                  <Button type="submit" disabled={submitting} className="text-white">{submitting ? 'Sending...' : 'Send Enquiry'}</Button>
+                  <Button type="submit" disabled={submitting} className="text-white">{submitting ? 'Sending...' :"Let's Talk"}</Button>
                   <DialogClose asChild>
                     <Button type="button" variant="outline" onClick={handleClose}>Cancel</Button>
                   </DialogClose>

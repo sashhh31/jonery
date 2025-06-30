@@ -26,7 +26,7 @@ import { Select, SelectTrigger, SelectContent, SelectItem, SelectValue } from "@
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/components/ui/use-toast";
-import emailjs from 'emailjs-com';
+import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem } from "@/components/ui/dropdown-menu";
 
 export default function Home() {
   const scrollRef = useRef<HTMLDivElement>(null);
@@ -43,15 +43,24 @@ export default function Home() {
   const [open, setOpen] = useState(false);
   const [selectedService, setSelectedService] = useState<string | null>(null);
   const { toast } = useToast();
-  const [form, setForm] = useState({
+  const [form, setForm] = useState<{
+    name: string;
+    email: string;
+    phone: string;
+    projectType: string | undefined;
+    propertyLocation: string;
+    projectDescription: string;
+    preferredContact: string;
+    Timeline: string;
+  }>({
     name: '',
     email: '',
     phone: '',
-    projectType: '',
+    projectType: undefined,
     propertyLocation: '',
     projectDescription: '',
     preferredContact: '',
-    timeline: ''
+    Timeline: ''
   });
   const [submitting, setSubmitting] = useState(false);
   const projectTypes = [
@@ -59,6 +68,7 @@ export default function Home() {
     'Kitchen',
     'Doors/Windows',
     'Commercial',
+    'Flooring Services',
     'Other'
   ];
   const contactMethods = [
@@ -76,7 +86,7 @@ export default function Home() {
   };
   const handleOpen = (service: string) => {
     setSelectedService(service);
-    setForm(f => ({ ...f, projectType: service }));
+    // Do not auto-fill projectType; let user select manually
     setOpen(true);
   };
   const handleClose = () => {
@@ -86,25 +96,27 @@ export default function Home() {
       name: '',
       email: '',
       phone: '',
-      projectType: '',
+      projectType: undefined,
       propertyLocation: '',
       projectDescription: '',
       preferredContact: '',
-      timeline: ''
+      Timeline: ''
     });
   };
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!form.projectType || form.projectType === '') {
+      toast({ title: 'Please select a service type', description: 'You must select a project type before submitting.', variant: 'destructive' });
+      return;
+    }
     setSubmitting(true);
     try {
-      await emailjs.send(
-        'service_heoa1wi',
-        'template_fvykw0l',
-        {
-          ...form
-        },
-        'WW5cLJW0ox5H5lB8i'
-      );
+      const response = await fetch('/api/send-email', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(form)
+      });
+      if (!response.ok) throw new Error('Failed to send');
       toast({ title: 'Enquiry sent!', description: 'We have received your enquiry and will contact you soon.' });
       handleClose();
     } catch (err) {
@@ -349,7 +361,7 @@ export default function Home() {
             {currentHero.subtitle}
           </p>
           <Link 
-            href="https://www.shayjoinery.co/" 
+            href="https://www.shayjoinery.co/our-services" 
             className="inline-block bg-[#d4ac29] hover:bg-[#c39c25] text-black py-3 px-8 rounded-full font-semibold"
           >
             Get Started
@@ -450,7 +462,7 @@ export default function Home() {
                 className={`mt-auto w-fit cursor-pointer text-base font-semibold transition-colors duration-200 relative group focus:outline-none focus:underline ${item.textColor}`}
                 style={{ display: 'inline-block' }}
               >
-                Know More
+                  Request Free Estimate
                 <span className="inline-block transition-all duration-200 opacity-0 group-hover:opacity-100 group-hover:translate-x-1 ml-1">→</span>
                 <span className="block h-0.5 bg-current scale-x-0 group-hover:scale-x-100 transition-transform duration-200 origin-left mt-1" style={{width:'100%'}}></span>
               </span>
@@ -469,7 +481,7 @@ export default function Home() {
               <Input name="phone" type="tel" placeholder="Phone" value={form.phone} onChange={handleInputChange} />
               <Select value={form.projectType} onValueChange={handleSelectChange}>
                 <SelectTrigger>
-                  <SelectValue placeholder="Project Type" />
+                  <SelectValue placeholder="Service" />
                 </SelectTrigger>
                 <SelectContent className="bg-white">
                   {projectTypes.map(type => (
@@ -501,9 +513,9 @@ export default function Home() {
                   />
                 )}
               </div>
-              <Input name="timeline" placeholder="Timeline" value={form.timeline} onChange={handleInputChange} />
+              <Input name="Timeline" placeholder="Tell us how soon you want your project started!" value={form.Timeline} onChange={handleInputChange} />
               <DialogFooter>
-                <Button type="submit" disabled={submitting} className="text-white">{submitting ? 'Sending...' : 'Send Enquiry'}</Button>
+                <Button type="submit" disabled={submitting} className="text-white">{submitting ? 'Sending...' : "Let's Talk"}</Button>
                 <DialogClose asChild>
                   <Button type="button" variant="outline" onClick={handleClose}>Cancel</Button>
                 </DialogClose>
