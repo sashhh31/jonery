@@ -192,14 +192,14 @@ const CarpentryProjectsPage = () => {
         <div className="absolute inset-0 bg-[#855024] opacity-60"></div>
         
         <div className="max-w-4xl mx-auto px-4 text-center relative z-10">
-          <h1 className="text-5xl md:text-6xl font-bold mb-4">
+          <h1 className="text-5xl md:text-6xl font-bold mb-4 leading-[1.1]">
             {(() => {
               const words = currentHero.title.split(' ');
               const mid = Math.ceil(words.length / 2);
               return <>{words.slice(0, mid).join(' ')}<br />{words.slice(mid).join(' ')}</>;
             })()}
           </h1>
-          <p className="text-xl text-gray-200 mb-8">
+          <p className="text-xl text-gray-200 mb-8 leading-relaxed">
             {currentHero.description}
           </p>
         </div>

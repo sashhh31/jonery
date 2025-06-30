@@ -128,7 +128,7 @@ const ShayJoineryContact = () => {
         body: JSON.stringify(formData)
       });
       if (!response.ok) throw new Error('Failed to send');
-      toast({ title: 'Enquiry sent!', description: 'We have received your enquiry and will contact you soon.' });
+      toast({ title: 'Done', description: 'Your enquiry has been sent successfully.' });
       setFormData({
         name: '',
         email: '',

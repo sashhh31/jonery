@@ -117,7 +117,7 @@ export default function Home() {
         body: JSON.stringify(form)
       });
       if (!response.ok) throw new Error('Failed to send');
-      toast({ title: 'Enquiry sent!', description: 'We have received your enquiry and will contact you soon.' });
+      toast({ title: 'Done', description: 'Your enquiry has been sent successfully.' });
       handleClose();
     } catch (err) {
       toast({ title: 'Failed to send enquiry', description: 'Please try again later.', variant: 'destructive' });
