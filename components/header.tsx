@@ -1,7 +1,7 @@
 "use client"
 import Link from "next/link"
 import Image from "next/image"
-import { Phone, MapPin, Clock } from "lucide-react"
+import { Phone, MapPin, Clock, Facebook, Linkedin, Twitter } from "lucide-react"
 import { useEffect, useState } from "react"
 import { getHeaderContent, HeaderContent } from "../lib/contentful"
 
@@ -40,6 +40,19 @@ export default function Header() {
 
   const currentHeader = headerData || fallbackHeader;
 
+  const getSocialIcon = (platform: string) => {
+    switch (platform.toLowerCase()) {
+      case 'facebook':
+        return <Facebook className="h-5 w-5" />;
+      case 'linkedin':
+        return <Linkedin className="h-5 w-5" />;
+      case 'twitter':
+        return <Twitter className="h-5 w-5" />;
+      default:
+        return null;
+    }
+  };
+
   return (
     <header>
       {/* Top Bar - Now with Contentful Data */}
@@ -62,7 +75,7 @@ export default function Header() {
           <div className="flex items-center space-x-4">
             {currentHeader.socialLinks.map((social, index) => (
               <Link key={index} href={social.url} className="text-white hover:text-gray-200">
-                <span className="text-sm">{social.platform}</span>
+                {getSocialIcon(social.platform)}
               </Link>
             ))}
           </div>
