@@ -1,7 +1,7 @@
 "use client"
 import Link from "next/link"
 import Image from "next/image"
-import { Phone, MapPin, Clock, Facebook, Linkedin, Twitter } from "lucide-react"
+import { Phone, MapPin, Clock, Facebook, Linkedin, Twitter, Youtube, Instagram } from "lucide-react"
 import { useEffect, useState } from "react"
 import { getHeaderContent, HeaderContent } from "../lib/contentful"
 
@@ -11,7 +11,13 @@ export default function Header() {
 
   // Fallback data (current hardcoded data)
   const fallbackHeader: HeaderContent = {
-    logo: null,
+    logo: {
+      fields: {
+        file: {
+          url: "/logo.png"
+        }
+      }
+    },
     businessHours: "Monday - Friday 9 AM - 5 PM",
     phone: "+1 (123) 456-7890",
     address: "2489 Gafforth Lane, LA",
@@ -40,14 +46,20 @@ export default function Header() {
 
   const currentHeader = headerData || fallbackHeader;
 
-  const getSocialIcon = (platform: string) => {
-    switch (platform.toLowerCase()) {
+  const getSocialIcon = (icon: string) => {
+    switch (icon?.toLowerCase()) {
       case 'facebook':
         return <Facebook className="h-5 w-5" />;
       case 'linkedin':
         return <Linkedin className="h-5 w-5" />;
       case 'twitter':
         return <Twitter className="h-5 w-5" />;
+      case 'youtube':
+      case 'yt':
+        return <Youtube className="h-5 w-5" />;
+      case 'instagram':
+      case 'insta':
+        return <Instagram className="h-5 w-5" />;
       default:
         return null;
     }
@@ -75,7 +87,7 @@ export default function Header() {
           <div className="flex items-center space-x-4">
             {currentHeader.socialLinks.map((social, index) => (
               <Link key={index} href={social.url} className="text-white hover:text-gray-200">
-                {getSocialIcon(social.platform)}
+                {getSocialIcon((social as any).icon || social.platform)}
               </Link>
             ))}
           </div>

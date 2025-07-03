@@ -6,6 +6,7 @@ import { useEffect, useState } from "react"
 import { getFooterContent, FooterContent } from "../lib/contentful"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "./ui/dialog"
 import type { FooterLink } from "../lib/contentful"
+import ReactMarkdown from 'react-markdown'
 
 // Extend FooterLink for support links to allow 'data' field
 interface SupportFooterLink extends Omit<FooterLink, 'url'> {
@@ -142,12 +143,14 @@ export default function Footer() {
                         {support.label}
                       </button>
                     </DialogTrigger>
-                    <DialogContent className="max-w-2xl w-full rounded-2xl p-10 shadow-2xl bg-white text-gray-900">
+                    <DialogContent className="max-w-2xl w-full rounded-2xl p-10 shadow-2xl bg-white text-gray-900 max-h-[70vh] overflow-y-auto">
                       <DialogHeader>
                         <DialogTitle className="text-2xl font-bold mb-2 text-green-800">{support.label}</DialogTitle>
                       </DialogHeader>
                       <hr className="my-4 border-green-200" />
-                      <div className="mt-2 whitespace-pre-line text-base leading-relaxed text-gray-700">{support.data}</div>
+                      <div className="prose prose-green max-w-none text-base leading-relaxed">
+                        <ReactMarkdown>{support.data}</ReactMarkdown>
+                      </div>
                     </DialogContent>
                   </Dialog>
                 </li>
