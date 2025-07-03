@@ -3,7 +3,7 @@ import React, { useState, useEffect } from 'react';
 import { Phone, Mail, MapPin, Menu, X, ChevronDown } from 'lucide-react';
 import Image from 'next/image';
 import { getContactHero, getContactFormSection, getOfficeAddressesSection, ContactHero, ContactFormSection, OfficeAddressesSection } from '../../lib/contentful';
-import { useToast } from "@/components/ui/use-toast";
+import PopupNotification from "@/components/PopupNotification";
 
 const ShayJoineryContact = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -13,7 +13,6 @@ const ShayJoineryContact = () => {
   const [activeLocation, setActiveLocation] = useState(0);
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
-  const { toast } = useToast();
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -25,6 +24,12 @@ const ShayJoineryContact = () => {
     Timeline: ''
   });
   const contactMethods = ['Email', 'Phone'];
+  const [popup, setPopup] = useState({
+    open: false,
+    type: "success",
+    title: "",
+    description: ""
+  });
 
   const fallbackHero = {
     title: "Get in Touch with London's Expert Carpenters",
@@ -128,7 +133,12 @@ const ShayJoineryContact = () => {
         body: JSON.stringify(formData)
       });
       if (!response.ok) throw new Error('Failed to send');
-      toast({ title: 'Done', description: 'Your enquiry has been sent successfully.' });
+      setPopup({
+        open: true,
+        type: "success",
+        title: "Success",
+        description: "Your enquiry has been sent to the owner."
+      });
       setFormData({
         name: '',
         email: '',
@@ -140,7 +150,12 @@ const ShayJoineryContact = () => {
         Timeline: ''
       });
     } catch (err) {
-      toast({ title: 'Failed to send enquiry', description: 'Please try again later.', variant: 'destructive' });
+      setPopup({
+        open: true,
+        type: "error",
+        title: "Failed",
+        description: "Your enquiry could not be sent. Please try again later."
+      });
     } finally {
       setSubmitting(false);
     }
@@ -164,6 +179,13 @@ const ShayJoineryContact = () => {
 
   return (
     <div className="min-h-screen bg-white">
+      <PopupNotification
+        open={popup.open}
+        onClose={() => setPopup(p => ({ ...p, open: false }))}
+        type={popup.type as any}
+        title={popup.title}
+        description={popup.description}
+      />
       {/* Header */}
       {/* Hero Section - Dynamic from Contentful */}
       <section className="relative bg-[#855024] py-24 text-white overflow-hidden">

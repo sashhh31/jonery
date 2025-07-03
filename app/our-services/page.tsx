@@ -24,6 +24,7 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/components/ui/use-toast";
 import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem } from "@/components/ui/dropdown-menu";
+import PopupNotification from "@/components/PopupNotification";
 
 const CarpentryServicesPage = () => {
   const [servicesData, setServicesData] = useState<Service[]>([]);
@@ -55,6 +56,12 @@ const CarpentryServicesPage = () => {
     Timeline: ''
   });
   const [submitting, setSubmitting] = useState(false);
+  const [popup, setPopup] = useState({
+    open: false,
+    type: "success",
+    title: "",
+    description: ""
+  });
 
   const projectTypes = [
     'Furniture',
@@ -100,7 +107,12 @@ const CarpentryServicesPage = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!form.projectType || form.projectType === '') {
-      toast({ title: 'Please select a service type', description: 'You must select a project type before submitting.', variant: 'destructive' });
+      setPopup({
+        open: true,
+        type: "error",
+        title: "Please select a service type",
+        description: "You must select a project type before submitting."
+      });
       return;
     }
     setSubmitting(true);
@@ -111,10 +123,20 @@ const CarpentryServicesPage = () => {
         body: JSON.stringify(form)
       });
       if (!response.ok) throw new Error('Failed to send');
-      toast({ title: 'Done', description: 'Your enquiry has been sent successfully.' });
+      setPopup({
+        open: true,
+        type: "success",
+        title: "Success",
+        description: "Your enquiry has been sent to the owner."
+      });
       handleClose();
     } catch (err) {
-      toast({ title: 'Failed to send enquiry', description: 'Please try again later.', variant: 'destructive' });
+      setPopup({
+        open: true,
+        type: "error",
+        title: "Failed",
+        description: "Your enquiry could not be sent. Please try again later."
+      });
     } finally {
       setSubmitting(false);
     }
@@ -317,6 +339,13 @@ const CarpentryServicesPage = () => {
 
   return (
     <div className="min-h-screen bg-gray-50">
+      <PopupNotification
+        open={popup.open}
+        onClose={() => setPopup(p => ({ ...p, open: false }))}
+        type={popup.type as any}
+        title={popup.title}
+        description={popup.description}
+      />
       {/* Hero Section */}
       <div className="relative bg-[#855024] py-24 text-white overflow-hidden">
         <Image

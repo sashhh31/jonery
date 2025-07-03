@@ -31,8 +31,8 @@ export async function POST(req: NextRequest) {
         'Accept': 'application/json'
       },
       body: JSON.stringify({
-        sender: { email: 'saswatpattanaik31@gmail.com' },
-        to: [{ email: 'saswatpattanaik31@gmail.com', name: 'Saswat Pattanaik' }],
+        sender: { email: `${process.env.BREVO_SENDER_EMAIL}` },
+        to: [{ email: `${process.env.BREVO_SENDER_EMAIL}`, name: 'Saswat Pattanaik' }],
         subject: `New Enquiry from ${name} (${projectType})`,
         htmlContent: `
           <h2>New Project Enquiry</h2>

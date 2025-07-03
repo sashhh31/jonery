@@ -27,6 +27,7 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/components/ui/use-toast";
 import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem } from "@/components/ui/dropdown-menu";
+import PopupNotification from "@/components/PopupNotification";
 
 export default function Home() {
   const scrollRef = useRef<HTMLDivElement>(null);
@@ -75,6 +76,12 @@ export default function Home() {
     'Email',
     'Phone'
   ];
+  const [popup, setPopup] = useState({
+    open: false,
+    type: "success",
+    title: "",
+    description: ""
+  });
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     setForm({ ...form, [e.target.name]: e.target.value });
   };
@@ -106,7 +113,12 @@ export default function Home() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!form.projectType || form.projectType === '') {
-      toast({ title: 'Please select a service type', description: 'You must select a project type before submitting.', variant: 'destructive' });
+      setPopup({
+        open: true,
+        type: "error",
+        title: "Please select a service type",
+        description: "You must select a project type before submitting."
+      });
       return;
     }
     setSubmitting(true);
@@ -117,10 +129,20 @@ export default function Home() {
         body: JSON.stringify(form)
       });
       if (!response.ok) throw new Error('Failed to send');
-      toast({ title: 'Done', description: 'Your enquiry has been sent successfully.' });
+      setPopup({
+        open: true,
+        type: "success",
+        title: "Success",
+        description: "Your enquiry has been sent to the owner."
+      });
       handleClose();
     } catch (err) {
-      toast({ title: 'Failed to send enquiry', description: 'Please try again later.', variant: 'destructive' });
+      setPopup({
+        open: true,
+        type: "error",
+        title: "Failed",
+        description: "Your enquiry could not be sent. Please try again later."
+      });
     } finally {
       setSubmitting(false);
     }
@@ -338,6 +360,13 @@ export default function Home() {
 
   return (
     <>
+      <PopupNotification
+        open={popup.open}
+        onClose={() => setPopup(p => ({ ...p, open: false }))}
+        type={popup.type as any}
+        title={popup.title}
+        description={popup.description}
+      />
       {/* Hero Section - Now with Contentful Data */}
       <section className="relative bg-[#925422] py-32 text-white overflow-hidden">
         <div className="absolute inset-0 z-0">
