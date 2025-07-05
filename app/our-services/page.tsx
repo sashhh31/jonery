@@ -1,6 +1,5 @@
 "use client"
-import React from 'react';
-import { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { Target, Zap, Shield, Award, CheckCircle, Users, Hammer, Home, DoorOpen, Building, ChevronLeft, ChevronRight, PlaneTakeoff, Lightbulb, MapPin } from 'lucide-react';
 import ServicesSection from '../test/page';
 import Image from "next/image";
@@ -265,6 +264,33 @@ const CarpentryServicesPage = () => {
     ]
   };
 
+  const scrollRef = useRef<HTMLDivElement>(null);
+  const scroll = (direction: "left" | "right") => {
+    if (scrollRef.current) {
+      const amount = 300;
+      scrollRef.current.scrollBy({
+        left: direction === "left" ? -amount : amount,
+        behavior: "smooth",
+      });
+    }
+  };
+
+  const currentProcess = processData || fallbackProcess;
+  const currentFeatures = featuresData || fallbackFeatures;
+
+  // Icon mapping function
+  const getIconComponent = (iconName: string) => {
+    const iconMap: any = {
+      'Target': <Target className="w-8 h-8" />,
+      'Zap': <Zap className="w-8 h-8" />,
+      'Shield': <Shield className="w-8 h-8" />,
+      'CheckCircle': <CheckCircle className="w-8 h-8" />,
+      'Award': <Award className="w-8 h-8" />,
+      'Users': <Users className="w-8 h-8" />
+    };
+    return iconMap[iconName] || <Target className="w-8 h-8" />;
+  };
+
   useEffect(() => {
     async function fetchContentfulData() {
       try {
@@ -297,34 +323,6 @@ const CarpentryServicesPage = () => {
 
     fetchContentfulData();
   }, []);
-
-  // Scroll function for services carousel
-  const scroll = (direction: "left" | "right") => {
-    const container = document.querySelector('.overflow-x-auto');
-    if (container) {
-      const scrollAmount = 300;
-      container.scrollBy({
-        left: direction === "left" ? -scrollAmount : scrollAmount,
-        behavior: "smooth"
-      });
-    }
-  };
-
-  const currentProcess = processData || fallbackProcess;
-  const currentFeatures = featuresData || fallbackFeatures;
-
-  // Icon mapping function
-  const getIconComponent = (iconName: string) => {
-    const iconMap: any = {
-      'Target': <Target className="w-8 h-8" />,
-      'Zap': <Zap className="w-8 h-8" />,
-      'Shield': <Shield className="w-8 h-8" />,
-      'CheckCircle': <CheckCircle className="w-8 h-8" />,
-      'Award': <Award className="w-8 h-8" />,
-      'Users': <Users className="w-8 h-8" />
-    };
-    return iconMap[iconName] || <Target className="w-8 h-8" />;
-  };
 
   if (loading) {
     return (
@@ -379,18 +377,18 @@ const CarpentryServicesPage = () => {
 
       {/* Services Section - Same as Home Page */}
       <section className="bg-[#f5f5f0] py-16 relative">
-        <div className="absolute right-0 top-0 h-full w-[300px] bg-contain bg-no-repeat bg-right" 
+        <div className="absolute right-0 top-0 h-full w-[300px] bg-contain bg-no-repeat bg-right hidden sm:block" 
              style={{ 
                backgroundImage: servicesHeaderData?.backgroundImage ? 
                  `url(https:${servicesHeaderData.backgroundImage.fields.file.url})` : 
                  'url("/Ornament.png")' 
              }} 
         />
-        <div className="max-w-7xl mx-auto px-6 relative z-10">
-          <p className="text-[#b46931] font-medium mb-2">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 relative z-10">
+          <p className="text-[#b46931] font-medium mb-2 text-center sm:text-left">
             {servicesHeaderData?.subtitle || "Our Services"}
           </p>
-          <h2 className="text-3xl font-bold text-[#1b1b1b] mb-4">
+          <h2 className="text-3xl sm:text-4xl font-bold text-[#1b1b1b] mb-4 text-center sm:text-left">
             {servicesHeaderData?.title ? (
               servicesHeaderData.title.split(' ').length > 6 ? (
                 <>
@@ -404,11 +402,12 @@ const CarpentryServicesPage = () => {
               <>Custom Furniture & Interior <br />Woodwork Built to Last.</>
             )}
           </h2>
-          <p className="text-gray-600 mb-12 max-w-2xl">
+          <p className="text-gray-600 mb-12 max-w-2xl mx-auto sm:mx-0 text-center sm:text-left">
             {servicesHeaderData?.description || "Our skilled London joiners combine time-honoured techniques with contemporary innovation to deliver"}
           </p>
 
-          <div className="flex gap-6 overflow-x-auto pb-4 scrollbar-hide">
+          {/* Responsive horizontal scroll for service cards */}
+          <div className="flex gap-6 overflow-x-auto pb-4 scrollbar-hide" ref={scrollRef}>
             {(servicesData.length > 0 ? servicesData : fallbackServices).map((item, idx) => (
               <div
                 key={idx}
@@ -417,8 +416,9 @@ const CarpentryServicesPage = () => {
                 style={{ minHeight: '320px' }}
               >
                 {/* Icon/Letter fixed in top-left */}
-                <div className="absolute top-4 left-4 text-3xl bg-white bg-opacity-20 w-12 h-12 rounded-full flex items-center justify-center shadow-md">
-                  {item.icon || '🛠️'}
+                <div className={`absolute top-4 left-4 text-3xl w-12 h-12 rounded-full flex items-center justify-center shadow-md ${item.textColor === 'text-white' ? 'bg-white' : 'bg-[#925422]'}`}
+                >
+                  <span className={item.textColor === 'text-white' ? 'text-black' : 'text-white'}>{item.icon}</span>
                 </div>
                 <div className="flex-1 flex flex-col justify-between">
                   <h3 className="text-lg font-semibold mb-2 mt-2">{item.title}</h3>
@@ -429,7 +429,7 @@ const CarpentryServicesPage = () => {
                   tabIndex={0}
                   onClick={() => handleOpen(item.title)}
                   onKeyPress={e => { if (e.key === 'Enter' || e.key === ' ') handleOpen(item.title); }}
-                  className="mt-auto w-fit cursor-pointer text-base font-semibold transition-colors duration-200 relative group focus:outline-none focus:underline"
+                  className={`mt-auto w-fit cursor-pointer text-base font-semibold transition-colors duration-200 relative group focus:outline-none focus:underline ${item.textColor}`}
                   style={{ display: 'inline-block' }}
                 >
                 Request Free Estimate
@@ -439,6 +439,39 @@ const CarpentryServicesPage = () => {
               </div>
             ))}
           </div>
+          {/* Scroll buttons: below and centered on mobile, sides on desktop */}
+          <div className="flex md:hidden justify-center gap-4 mt-6">
+            <button
+              className="w-10 h-10 rounded-full bg-[#e4cc7f] text-white flex items-center justify-center"
+              aria-label="Scroll left"
+              onClick={() => scroll("left")}
+            >
+              <ChevronLeft className="w-5 h-5" />
+            </button>
+            <button
+              className="w-10 h-10 rounded-full bg-[#b49d2f] text-white flex items-center justify-center"
+              aria-label="Scroll right"
+              onClick={() => scroll("right")}
+            >
+              <ChevronRight className="w-5 h-5" />
+            </button>
+          </div>
+          <button
+            className="hidden md:flex absolute left-0 top-1/2 -translate-y-1/2 bg-[#e4cc7f] text-white w-10 h-10 rounded-full items-center justify-center z-10"
+            aria-label="Scroll left"
+            style={{ marginLeft: '-2.5rem' }}
+            onClick={() => scroll("left")}
+          >
+            <ChevronLeft className="w-5 h-5" />
+          </button>
+          <button
+            className="hidden md:flex absolute right-0 top-1/2 -translate-y-1/2 bg-[#b49d2f] text-white w-10 h-10 rounded-full items-center justify-center z-10"
+            aria-label="Scroll right"
+            style={{ marginRight: '-2.5rem' }}
+            onClick={() => scroll("right")}
+          >
+            <ChevronRight className="w-5 h-5" />
+          </button>
 
           <Dialog open={open} onOpenChange={setOpen}>
             {/* Custom DialogOverlay for blur and opacity */}

@@ -443,133 +443,135 @@ export default function Home() {
 
       {/* About Us Section */}
       <section className="bg-[#f5f5f0] py-16 relative">
-      <div className="absolute right-0 top-0 h-full w-[300px] bg-contain bg-no-repeat bg-right"
-           style={{
-             backgroundImage: currentServicesHeader.backgroundImage && currentServicesHeader.backgroundImage.fields && currentServicesHeader.backgroundImage.fields.file && currentServicesHeader.backgroundImage.fields.file.url ?
-               `url('https:${currentServicesHeader.backgroundImage.fields.file.url}')` :
-               'url("/Ornament.png")'
-           }}
-      />
-      <div className="max-w-7xl mx-auto px-6 relative z-10">
-        <p className="text-[#b46931] font-medium mb-2">{currentServicesHeader.subtitle}</p>
-        <h2 className="text-3xl font-bold text-[#1b1b1b] mb-4">
-          {currentServicesHeader.title.split(' ').length > 6 ? (
-            <>
-              {currentServicesHeader.title.split(' ').slice(0, Math.ceil(currentServicesHeader.title.split(' ').length / 2)).join(' ')} <br />
-              {currentServicesHeader.title.split(' ').slice(Math.ceil(currentServicesHeader.title.split(' ').length / 2)).join(' ')}
-            </>
-          ) : (
-            currentServicesHeader.title
-          )}
-        </h2>
-        <p className="text-gray-600 mb-12 max-w-2xl">
-          {currentServicesHeader.description}
-        </p>
+        <div className="absolute right-0 top-0 h-full w-[300px] bg-contain bg-no-repeat bg-right hidden sm:block"
+             style={{
+               backgroundImage: currentServicesHeader.backgroundImage && currentServicesHeader.backgroundImage.fields && currentServicesHeader.backgroundImage.fields.file && currentServicesHeader.backgroundImage.fields.file.url ?
+                 `url('https:${currentServicesHeader.backgroundImage.fields.file.url}')` :
+                 'url("/Ornament.png")'
+             }}
+        />
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 relative z-10">
+          <p className="text-[#b46931] font-medium mb-2 text-center sm:text-left">{currentServicesHeader.subtitle}</p>
+          <h2 className="text-3xl sm:text-4xl font-bold text-[#1b1b1b] mb-4 text-center sm:text-left">
+            {currentServicesHeader.title.split(' ').length > 6 ? (
+              <>
+                {currentServicesHeader.title.split(' ').slice(0, Math.ceil(currentServicesHeader.title.split(' ').length / 2)).join(' ')} <br />
+                {currentServicesHeader.title.split(' ').slice(Math.ceil(currentServicesHeader.title.split(' ').length / 2)).join(' ')}
+              </>
+            ) : (
+              currentServicesHeader.title
+            )}
+          </h2>
+          <p className="text-gray-600 mb-12 max-w-2xl mx-auto sm:mx-0 text-center sm:text-left">
+            {currentServicesHeader.description}
+          </p>
 
-        <div className="flex gap-6 overflow-x-auto pb-4 scrollbar-hide" ref={scrollRef}>
-          {currentServices.map((item, idx) => (
-            <div
-              key={idx}
-              className={`relative min-w-[280px] p-6 pt-14 rounded-md shadow-sm ${item.backgroundColor} ${item.textColor} flex flex-col justify-between`}
-              style={{ minHeight: '320px' }}
-            >
-              {/* Icon/Letter fixed in top-left */}
+          {/* Responsive horizontal scroll for service cards */}
+          <div className="flex gap-6 overflow-x-auto pb-4 scrollbar-hide" ref={scrollRef}>
+            {currentServices.map((item, idx) => (
               <div
-                className={`absolute top-4 left-4 text-3xl w-12 h-12 rounded-full flex items-center justify-center shadow-md ${item.textColor === 'text-white' ? 'bg-white' : 'bg-[#925422]'}`}
+                key={idx}
+                className={`relative min-w-[280px] p-6 pt-14 rounded-md shadow-sm ${item.backgroundColor} ${item.textColor} flex flex-col justify-between`}
+                style={{ minHeight: '320px' }}
               >
-                <span className={item.textColor === 'text-white' ? 'text-black' : 'text-white'}>{item.icon}</span>
+                {/* Icon/Letter fixed in top-left */}
+                <div
+                  className={`absolute top-4 left-4 text-3xl w-12 h-12 rounded-full flex items-center justify-center shadow-md ${item.textColor === 'text-white' ? 'bg-white' : 'bg-[#925422]'}`}
+                >
+                  <span className={item.textColor === 'text-white' ? 'text-black' : 'text-white'}>{item.icon}</span>
+                </div>
+                <div className="flex-1 flex flex-col justify-between">
+                  <h3 className="text-lg font-semibold mb-2 mt-2">{item.title}</h3>
+                  <p className="text-sm opacity-80 mb-4">{item.description}</p>
+                </div>
+                <span
+                  role="button"
+                  tabIndex={0}
+                  onClick={() => handleOpen(item.title)}
+                  onKeyPress={e => { if (e.key === 'Enter' || e.key === ' ') handleOpen(item.title); }}
+                  className={`mt-auto w-fit cursor-pointer text-base font-semibold transition-colors duration-200 relative group focus:outline-none focus:underline ${item.textColor}`}
+                  style={{ display: 'inline-block' }}
+                >
+                    Request Free Estimate
+                  <span className="inline-block transition-all duration-200 opacity-0 group-hover:opacity-100 group-hover:translate-x-1 ml-1">→</span>
+                  <span className="block h-0.5 bg-current scale-x-0 group-hover:scale-x-100 transition-transform duration-200 origin-left mt-1" style={{width:'100%'}}></span>
+                </span>
               </div>
-              <div className="flex-1 flex flex-col justify-between">
-                <h3 className="text-lg font-semibold mb-2 mt-2">{item.title}</h3>
-                <p className="text-sm opacity-80 mb-4">{item.description}</p>
-              </div>
-              <span
-                role="button"
-                tabIndex={0}
-                onClick={() => handleOpen(item.title)}
-                onKeyPress={e => { if (e.key === 'Enter' || e.key === ' ') handleOpen(item.title); }}
-                className={`mt-auto w-fit cursor-pointer text-base font-semibold transition-colors duration-200 relative group focus:outline-none focus:underline ${item.textColor}`}
-                style={{ display: 'inline-block' }}
-              >
-                  Request Free Estimate
-                <span className="inline-block transition-all duration-200 opacity-0 group-hover:opacity-100 group-hover:translate-x-1 ml-1">→</span>
-                <span className="block h-0.5 bg-current scale-x-0 group-hover:scale-x-100 transition-transform duration-200 origin-left mt-1" style={{width:'100%'}}></span>
-              </span>
-            </div>
-          ))}
+            ))}
+          </div>
+
+          <Dialog open={open} onOpenChange={setOpen}>
+            <DialogOverlay className="bg-black/60 backdrop-blur-sm" />
+            <DialogContent className="bg-white/90 backdrop-blur-lg shadow-2xl rounded-2xl p-8 max-w-lg w-full transition-all duration-300 border border-gray-200">
+              <DialogHeader>
+                <DialogTitle>Project Enquiry Form</DialogTitle>
+              </DialogHeader>
+              <form onSubmit={handleSubmit} className="space-y-4">
+                <Input name="name" placeholder="Name" value={form.name} onChange={handleInputChange} required />
+                <Input name="email" type="email" placeholder="Email" value={form.email} onChange={handleInputChange} required />
+                <Input name="phone" type="tel" placeholder="Phone" value={form.phone} onChange={handleInputChange} />
+                <Select value={form.projectType} onValueChange={handleSelectChange}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Service" />
+                  </SelectTrigger>
+                  <SelectContent className="bg-white">
+                    {projectTypes.map(type => (
+                      <SelectItem key={type} value={type}>{type}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <Input name="propertyLocation" placeholder="Property Location" value={form.propertyLocation} onChange={handleInputChange} />
+                <Textarea name="projectDescription" placeholder="Project Description" value={form.projectDescription} onChange={handleInputChange} />
+                <div>
+                  <label className="block mb-1 font-medium">Preferred Contact Method</label>
+                  <RadioGroup value={form.preferredContact} onValueChange={handleRadioChange} className="flex gap-4">
+                    {contactMethods.map(method => (
+                      <div key={method} className="flex items-center gap-2">
+                        <RadioGroupItem value={method} id={method} />
+                        <label htmlFor={method} className="text-gray-700 cursor-pointer">{method}</label>
+                      </div>
+                    ))}
+                  </RadioGroup>
+                  {form.preferredContact === 'Phone' && (
+                    <Input
+                      name="phone"
+                      type="tel"
+                      placeholder="Enter your phone number"
+                      value={form.phone}
+                      onChange={handleInputChange}
+                      required
+                      className="mt-2"
+                    />
+                  )}
+                </div>
+                <Input name="Timeline" placeholder="Tell us how soon you want your project started!" value={form.Timeline} onChange={handleInputChange} />
+                <DialogFooter>
+                  <Button type="submit" disabled={submitting} className="text-white">{submitting ? 'Sending...' : "Let's Talk"}</Button>
+                  <DialogClose asChild>
+                    <Button type="button" variant="outline" onClick={handleClose}>Cancel</Button>
+                  </DialogClose>
+                </DialogFooter>
+              </form>
+            </DialogContent>
+          </Dialog>
+          <div className="flex justify-end mt-6 space-x-4">
+            <button 
+              className="w-10 h-10 rounded-full bg-[#e4cc7f] text-white flex items-center justify-center"
+              aria-label="Scroll left"
+              onClick={() => scroll("left")}
+            >
+              <ChevronLeft className="w-5 h-5" />
+            </button>
+            <button 
+              className="w-10 h-10 rounded-full bg-[#b49d2f] text-white flex items-center justify-center"
+              aria-label="Scroll right"
+              onClick={() => scroll("right")}
+            >
+              <ChevronRight className="w-5 h-5" />
+            </button>
+          </div>
         </div>
-        <Dialog open={open} onOpenChange={setOpen}>
-          <DialogOverlay className="bg-black/60 backdrop-blur-sm" />
-          <DialogContent className="bg-white/90 backdrop-blur-lg shadow-2xl rounded-2xl p-8 max-w-lg w-full transition-all duration-300 border border-gray-200">
-            <DialogHeader>
-              <DialogTitle>Project Enquiry Form</DialogTitle>
-            </DialogHeader>
-            <form onSubmit={handleSubmit} className="space-y-4">
-              <Input name="name" placeholder="Name" value={form.name} onChange={handleInputChange} required />
-              <Input name="email" type="email" placeholder="Email" value={form.email} onChange={handleInputChange} required />
-              <Input name="phone" type="tel" placeholder="Phone" value={form.phone} onChange={handleInputChange} />
-              <Select value={form.projectType} onValueChange={handleSelectChange}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Service" />
-                </SelectTrigger>
-                <SelectContent className="bg-white">
-                  {projectTypes.map(type => (
-                    <SelectItem key={type} value={type}>{type}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-              <Input name="propertyLocation" placeholder="Property Location" value={form.propertyLocation} onChange={handleInputChange} />
-              <Textarea name="projectDescription" placeholder="Project Description" value={form.projectDescription} onChange={handleInputChange} />
-              <div>
-                <label className="block mb-1 font-medium">Preferred Contact Method</label>
-                <RadioGroup value={form.preferredContact} onValueChange={handleRadioChange} className="flex gap-4">
-                  {contactMethods.map(method => (
-                    <div key={method} className="flex items-center gap-2">
-                      <RadioGroupItem value={method} id={method} />
-                      <label htmlFor={method} className="text-gray-700 cursor-pointer">{method}</label>
-                    </div>
-                  ))}
-                </RadioGroup>
-                {form.preferredContact === 'Phone' && (
-                  <Input
-                    name="phone"
-                    type="tel"
-                    placeholder="Enter your phone number"
-                    value={form.phone}
-                    onChange={handleInputChange}
-                    required
-                    className="mt-2"
-                  />
-                )}
-              </div>
-              <Input name="Timeline" placeholder="Tell us how soon you want your project started!" value={form.Timeline} onChange={handleInputChange} />
-              <DialogFooter>
-                <Button type="submit" disabled={submitting} className="text-white">{submitting ? 'Sending...' : "Let's Talk"}</Button>
-                <DialogClose asChild>
-                  <Button type="button" variant="outline" onClick={handleClose}>Cancel</Button>
-                </DialogClose>
-              </DialogFooter>
-            </form>
-          </DialogContent>
-        </Dialog>
-        <div className="flex justify-end mt-6 space-x-4">
-          <button 
-            className="w-10 h-10 rounded-full bg-[#e4cc7f] text-white flex items-center justify-center"
-            aria-label="Scroll left"
-            onClick={() => scroll("left")}
-          >
-            <ChevronLeft className="w-5 h-5" />
-          </button>
-          <button 
-            className="w-10 h-10 rounded-full bg-[#b49d2f] text-white flex items-center justify-center"
-            aria-label="Scroll right"
-            onClick={() => scroll("right")}
-          >
-            <ChevronRight className="w-5 h-5" />
-          </button>
-        </div>
-      </div>
-    </section>
+      </section>
 
       {/* Gallery Section - Dynamic from Contentful */}
       <section className="bg-[#f5f5f0] section-padding">
@@ -619,8 +621,27 @@ export default function Home() {
                   />
                 ))}
             </div>
+            {/* Slider buttons: below and centered on mobile, sides on desktop */}
+            <div className="flex md:hidden justify-center gap-4 mt-6">
+              <button
+                className="w-10 h-10 rounded-full bg-white shadow text-gray-600 flex items-center justify-center"
+                aria-label="Previous testimonial"
+                onClick={() => setTestimonialIndex((prev) => prev - 2 < 0 ? Math.max(0, currentTestimonials.testimonials.length - (currentTestimonials.testimonials.length % 2 === 0 ? 2 : 1)) : prev - 2)}
+                disabled={testimonialIndex === 0}
+              >
+                <ChevronLeft className="h-6 w-6" />
+              </button>
+              <button
+                className="w-10 h-10 rounded-full bg-white shadow text-gray-600 flex items-center justify-center"
+                aria-label="Next testimonial"
+                onClick={() => setTestimonialIndex((prev) => prev + 2 >= currentTestimonials.testimonials.length ? 0 : prev + 2)}
+                disabled={testimonialIndex + 2 >= currentTestimonials.testimonials.length}
+              >
+                <ChevronRight className="h-6 w-6" />
+              </button>
+            </div>
             <button
-              className="absolute -left-16 top-1/2 -translate-y-1/2 bg-white rounded-full p-3 shadow-lg hover:shadow-xl transition-all duration-300 z-10"
+              className="hidden md:flex absolute -left-16 top-1/2 -translate-y-1/2 bg-white rounded-full p-3 shadow-lg hover:shadow-xl transition-all duration-300 z-10"
               aria-label="Previous testimonial"
               onClick={() => setTestimonialIndex((prev) => prev - 2 < 0 ? Math.max(0, currentTestimonials.testimonials.length - (currentTestimonials.testimonials.length % 2 === 0 ? 2 : 1)) : prev - 2)}
               disabled={testimonialIndex === 0}
@@ -628,7 +649,7 @@ export default function Home() {
               <ChevronLeft className="h-6 w-6 text-gray-600" />
             </button>
             <button
-              className="absolute -right-16 top-1/2 -translate-y-1/2 bg-white rounded-full p-3 shadow-lg hover:shadow-xl transition-all duration-300 z-10"
+              className="hidden md:flex absolute -right-16 top-1/2 -translate-y-1/2 bg-white rounded-full p-3 shadow-lg hover:shadow-xl transition-all duration-300 z-10"
               aria-label="Next testimonial"
               onClick={() => setTestimonialIndex((prev) => prev + 2 >= currentTestimonials.testimonials.length ? 0 : prev + 2)}
               disabled={testimonialIndex + 2 >= currentTestimonials.testimonials.length}

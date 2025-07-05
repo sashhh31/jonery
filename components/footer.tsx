@@ -88,9 +88,11 @@ export default function Footer() {
   return (
     <footer className="bg-[#5a7d2a] text-white">
       <div className="container py-12">
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
-          <div>
-            <Link href="/" className="mb-4 md:mb-0">
+        {/* Mobile Layout: Logo/Description on top, Services left, Company/Support right */}
+        <div className="block md:hidden">
+          {/* Logo and Description - Full width on mobile */}
+          <div className="flex flex-col items-center text-center mb-8">
+            <Link href="/" className="mb-4">
               <Image
                 src={currentFooter.logo ? 
                   `https:${currentFooter.logo.fields.file.url}` : 
@@ -102,10 +104,10 @@ export default function Footer() {
                 className="mr-3 mb-6"
               />
             </Link>
-            <p className="text-sm mb-4">
+            <p className="text-sm mb-4 max-w-xs mx-auto">
               {currentFooter.description}
             </p>
-            <div className="flex space-x-4 mt-6">
+            <div className="flex space-x-4 mt-6 justify-center">
               {currentFooter.socialLinks.map((social, index) => (
                 <Link key={index} href={social.url} className="text-white hover:text-gray-200">
                   {getSocialIcon(social.icon)}
@@ -114,7 +116,88 @@ export default function Footer() {
             </div>
           </div>
 
-          <div>
+          {/* Services left, Company/Support right on mobile */}
+          <div className="grid grid-cols-2 gap-6">
+            {/* Services - Left side */}
+            <div className="flex flex-col items-center text-center">
+              <h4 className="font-bold text-lg mb-4">Services</h4>
+              <ul className="space-y-2">
+                {currentFooter.serviceLinks.map((service, index) => (
+                  <FooterLink key={index} href={service.url} label={service.label} />
+                ))}
+              </ul>
+            </div>
+
+            {/* Company and Support - Right side */}
+            <div className="flex flex-col items-center text-center space-y-6">
+              {/* Company */}
+              <div className="flex flex-col items-center text-center">
+                <h4 className="font-bold text-lg mb-4">Company</h4>
+                <ul className="space-y-2">
+                  {currentFooter.companyLinks.map((company, index) => (
+                    <FooterLink key={index} href={company.url} label={company.label} />
+                  ))}
+                </ul>
+              </div>
+
+              {/* Support */}
+              <div className="flex flex-col items-center text-center">
+                <h4 className="font-bold text-lg mb-4">Support</h4>
+                <ul className="space-y-2">
+                  {(currentFooter.supportLinks as unknown as SupportFooterLink[]).map((support, index) => (
+                    <li key={index}>
+                      <Dialog>
+                        <DialogTrigger asChild>
+                          <button className="text-sm hover:underline text-center w-full">
+                            {support.label}
+                          </button>
+                        </DialogTrigger>
+                        <DialogContent className="max-w-2xl w-full rounded-2xl p-10 shadow-2xl bg-white text-gray-900 max-h-[70vh] overflow-y-auto">
+                          <DialogHeader>
+                            <DialogTitle className="text-2xl font-bold mb-2 text-green-800">{support.label}</DialogTitle>
+                          </DialogHeader>
+                          <hr className="my-4 border-green-200" />
+                          <div className="prose prose-green max-w-none text-base leading-relaxed">
+                            <ReactMarkdown>{support.data}</ReactMarkdown>
+                          </div>
+                        </DialogContent>
+                      </Dialog>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Desktop Layout: 4-column grid */}
+        <div className="hidden md:grid md:grid-cols-4 gap-8">
+          <div className="flex flex-col items-center text-center">
+            <Link href="/" className="mb-4">
+              <Image
+                src={currentFooter.logo ? 
+                  `https:${currentFooter.logo.fields.file.url}` : 
+                  "/logo.png"
+                }
+                alt="Shay Joinery Ltd Logo"
+                width={60}
+                height={60}
+                className="mr-3 mb-6"
+              />
+            </Link>
+            <p className="text-sm mb-4 max-w-xs mx-auto">
+              {currentFooter.description}
+            </p>
+            <div className="flex space-x-4 mt-6 justify-center">
+              {currentFooter.socialLinks.map((social, index) => (
+                <Link key={index} href={social.url} className="text-white hover:text-gray-200">
+                  {getSocialIcon(social.icon)}
+                </Link>
+              ))}
+            </div>
+          </div>
+
+          <div className="flex flex-col items-center text-center">
             <h4 className="font-bold text-lg mb-4">Services</h4>
             <ul className="space-y-2">
               {currentFooter.serviceLinks.map((service, index) => (
@@ -123,7 +206,7 @@ export default function Footer() {
             </ul>
           </div>
 
-          <div>
+          <div className="flex flex-col items-center text-center">
             <h4 className="font-bold text-lg mb-4">Company</h4>
             <ul className="space-y-2">
               {currentFooter.companyLinks.map((company, index) => (
@@ -132,14 +215,14 @@ export default function Footer() {
             </ul>
           </div>
 
-          <div>
+          <div className="flex flex-col items-center text-center">
             <h4 className="font-bold text-lg mb-4">Support</h4>
             <ul className="space-y-2">
               {(currentFooter.supportLinks as unknown as SupportFooterLink[]).map((support, index) => (
                 <li key={index}>
                   <Dialog>
                     <DialogTrigger asChild>
-                      <button className="text-sm hover:underline text-left w-full">
+                      <button className="text-sm hover:underline text-center w-full">
                         {support.label}
                       </button>
                     </DialogTrigger>
@@ -161,7 +244,7 @@ export default function Footer() {
       </div>
 
       <div className="border-t border-[#6b8e3b] py-4">
-        <div className="container">
+        <div className="container flex flex-col items-center justify-center">
           <p className="text-sm text-center">{currentFooter.copyrightText}</p>
         </div>
       </div>
@@ -172,7 +255,7 @@ export default function Footer() {
 function FooterLink({ href, label }: { href: string; label: string }) {
   return (
     <li>
-      <Link href={href || '#'} className="text-sm hover:underline">
+      <Link href={href || '#'} className="text-sm hover:underline text-center">
         {label}
       </Link>
     </li>
